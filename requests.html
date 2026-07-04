@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exchange Requests - LearnLoop</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+    <header class="navbar">
+        <div class="nav-container">
+            <a href="index.html" class="logo">
+                Learn<span>Loop</span>
+            </a>
+            <nav class="nav-menu">
+                <a href="explore.html">Explore</a>
+                <a href="dashboard.html">Dashboard</a>
+                <a href="requests.html">Requests</a>
+                <a href="chat.html">Messages</a>
+            </nav>
+            <div class="nav-actions">
+                <span class="dashboard-avatar">JL</span>
+            </div>
+        </div>
+    </header>
+
+    <main class="requests-view">
+        <div class="requests-container">
+            
+            <section class="requests-box">
+                <h2>Skill Exchange Requests</h2>
+                
+                <div class="requests-tabs">
+                    <button class="tab-btn active">Pending (1)</button>
+                    <button class="tab-btn">Accepted</button>
+                    <button class="tab-btn">Rejected</button>
+                </div>
+
+                <div class="requests-list">
+                    
+                    <div class="request-card">
+                        <div class="request-user-info">
+                            <div class="request-avatar">SK</div>
+                            <div>
+                                <h3>Sarah Kapoor</h3>
+                                <p>wants to learn <strong>UI/UX Design</strong> from you in exchange for <strong>Python</strong></p>
+                            </div>
+                        </div>
+                        <div class="request-actions">
+                            <button class="btn btn-primary">Accept</button>
+                            <button class="btn btn-outline">Reject</button>
+                        </div>
+                    </div>
+
+                </div>
+            </section>
+
+            <section class="scheduler-modal-box">
+                <h3>Schedule Learning Session</h3>
+                <p>Select your preferred date and time to lock in your 1-on-1 exchange session loop.</p>
+                
+                <form class="scheduler-form">
+                    <div class="form-group">
+                        <label for="session-date">Preferred Date</label>
+                        <input type="date" id="session-date" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="session-time">Preferred Time</label>
+                        <input type="time" id="session-time" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-full">Confirm Session Block</button>
+                </form>
+            </section>
+
+        </div>
+    </main>
+
+    <footer class="footer">
+        <p>&copy; 2026 LearnLoop Platform. Built for community learning.</p>
+    </footer>
+
+    <script src="js/requests.js"></script>
+</body>
+</html>

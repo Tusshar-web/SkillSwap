@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Messages - LearnLoop</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+    <header class="navbar">
+        <div class="nav-container">
+            <a href="index.html" class="logo">
+                Learn<span>Loop</span>
+            </a>
+            <nav class="nav-menu">
+                <a href="explore.html">Explore</a>
+                <a href="dashboard.html">Dashboard</a>
+                <a href="requests.html">Requests</a>
+                <a href="chat.html">Messages</a>
+            </nav>
+            <div class="nav-actions">
+                <span class="dashboard-avatar">JL</span>
+            </div>
+        </div>
+    </header>
+
+    <main class="chat-view">
+        <div class="chat-container">
+            
+            <aside class="chat-sidebar">
+                <div class="sidebar-header">
+                    <h3>Active Loops</h3>
+                </div>
+                <div class="chat-list">
+                    <div class="chat-user-item active">
+                        <div class="chat-user-avatar">SK</div>
+                        <div class="chat-user-meta">
+                            <h4>Sarah Kapoor</h4>
+                            <p>Let's schedule our python loop!</p>
+                        </div>
+                    </div>
+                    <div class="chat-user-item">
+                        <div class="chat-user-avatar">AM</div>
+                        <div class="chat-user-meta">
+                            <h4>Alex Miller</h4>
+                            <p>Thanks for the session today!</p>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+
+            <section class="chat-window">
+                <div class="window-header">
+                    <div class="header-user-info">
+                        <div class="chat-user-avatar">SK</div>
+                        <div>
+                            <h4>Sarah Kapoor</h4>
+                            <p class="user-status">Online</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="message-thread">
+                    <div class="message message-received">
+                        <p>Hey there! I saw you accepted my request to trade Python basics for UI design.</p>
+                    </div>
+                    <div class="message message-sent">
+                        <p>Yes, absolutely! I am super excited to get started on Python.</p>
+                    </div>
+                    <div class="message message-received">
+                        <p>Awesome! Let's schedule our python loop!</p>
+                    </div>
+                </div>
+
+                <form class="message-input-area">
+                    <input type="text" placeholder="Type a message to keep the loop going..." required>
+                    <button type="submit" class="btn btn-primary">Send</button>
+                </form>
+            </section>
+
+            <aside class="review-sidebar">
+                <h3>Leave a Review</h3>
+                <p>Complete your session loop by giving feedback to your partner tracker.</p>
+                
+                <form class="review-form">
+                    <div class="form-group">
+                        <label for="rating-select">Select Rating</label>
+                        <select id="rating-select" class="review-dropdown" required>
+                            <option value="5">⭐⭐⭐⭐⭐ 5 Stars</option>
+                            <option value="4">⭐⭐⭐⭐ 4 Stars</option>
+                            <option value="3">⭐⭐⭐ 3 Stars</option>
+                            <option value="2">⭐⭐ 2 Stars</option>
+                            <option value="1">⭐ 1 Star</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="feedback-text">Written Feedback</label>
+                        <textarea id="feedback-text" rows="3" placeholder="How did the skill exchange session go?" required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-full">Submit Feedback</button>
+                </form>
+            </aside>
+
+        </div>
+    </main>
+
+    <footer class="footer">
+        <p>&copy; 2026 LearnLoop Platform. Built for community learning.</p>
+    </footer>
+
+    <script src="js/chat.js"></script>
+</body>
+</html>
