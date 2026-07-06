@@ -1,0 +1,331 @@
+.requests-view {
+    background-color: var(--background-accent);
+    min-height: calc(100vh - 9rem);
+    padding: 3rem 1.5rem;
+}
+
+.requests-container {
+    max-width: 900px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1.5fr 1fr;
+    gap: 2rem;
+    align-items: start;
+}
+
+.requests-box, .scheduler-modal-box {
+    background: #ffffff;
+    padding: 2rem;
+    border-radius: 10px;
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    height: fit-content;
+}
+
+.requests-box h2, .scheduler-modal-box h3 {
+    font-size: 1.4rem;
+    margin-bottom: 1.25rem;
+    letter-spacing: -0.4px;
+}
+
+.scheduler-modal-box p {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin-bottom: 1.5rem;
+    line-height: 1.4;
+}
+
+.requests-tabs {
+    display: flex;
+    gap: 0.5rem;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.5rem;
+}
+
+.tab-btn {
+    background: none;
+    border: none;
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--text-muted);
+    cursor: pointer;
+    border-radius: 4px;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.tab-btn:hover {
+    background-color: rgba(0, 0, 0, 0.03);
+    color: var(--text-main);
+}
+
+.tab-btn.active {
+    background-color: rgba(0, 112, 243, 0.06);
+    color: var(--primary-color);
+    font-weight: 600;
+}
+
+.tab-count {
+    font-size: 0.72rem;
+    font-weight: 600;
+    background-color: rgba(0, 0, 0, 0.06);
+    color: var(--text-muted);
+    border-radius: 100px;
+    padding: 0.1rem 0.45rem;
+    min-width: 1.1rem;
+    text-align: center;
+}
+
+.tab-btn.active .tab-count {
+    background-color: var(--primary-color);
+    color: #ffffff;
+}
+
+.requests-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.empty-state {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    text-align: center;
+    padding: 2rem 0;
+}
+
+.request-card {
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: 8px;
+    padding: 1.25rem;
+    animation: card-in 0.2s ease;
+}
+
+@keyframes card-in {
+    from { opacity: 0; transform: translateY(4px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.request-user-info {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    margin-bottom: 1.25rem;
+}
+
+.request-avatar {
+    width: 40px;
+    height: 40px;
+    background-color: #e5e5ea;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 0.85rem;
+    flex-shrink: 0;
+}
+
+.request-user-info h3 { font-size: 1rem; font-weight: 600; margin-bottom: 0.15rem; }
+
+.request-user-info p { font-size: 0.9rem; color: var(--text-main); line-height: 1.4; }
+
+.request-user-info strong { color: var(--primary-color); }
+
+.request-actions { display: flex; gap: 0.5rem; }
+
+.request-actions .btn { padding: 0.5rem 1rem; font-size: 0.85rem; }
+
+.request-status-tag {
+    display: inline-block;
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 0.25rem 0.65rem;
+    border-radius: 100px;
+    margin-bottom: 1rem;
+}
+
+.request-status-tag.accepted {
+    background-color: rgba(0, 168, 150, 0.1);
+    color: var(--learn);
+}
+
+.request-status-tag.rejected {
+    background-color: rgba(255, 90, 60, 0.1);
+    color: var(--teach);
+}
+
+/* Google Meet section attached to an accepted request card */
+.request-meet {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px dashed rgba(0, 0, 0, 0.1);
+}
+
+.request-meet-label {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    margin-bottom: 0.6rem;
+    display: block;
+}
+
+.request-meet-row {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.request-meet-row input {
+    flex: 1;
+    padding: 0.55rem 0.7rem;
+    border: 1px solid rgba(0, 0, 0, 0.15);
+    border-radius: 6px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.8rem;
+}
+
+.request-meet-row .btn {
+    padding: 0.5rem 0.85rem;
+    font-size: 0.8rem;
+    white-space: nowrap;
+}
+
+.request-meet-link {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    background-color: rgba(0, 168, 150, 0.06);
+    border: 1px solid rgba(0, 168, 150, 0.2);
+    border-radius: 6px;
+    padding: 0.6rem 0.85rem;
+}
+
+.request-meet-link a {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.8rem;
+    color: var(--learn);
+    font-weight: 600;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.request-meet-link .meet-link-actions {
+    display: flex;
+    gap: 0.4rem;
+    flex-shrink: 0;
+}
+
+.request-meet-link .meet-link-actions button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    padding: 0.2rem 0.4rem;
+}
+
+.request-meet-link .meet-link-actions button:hover {
+    color: var(--text-main);
+}
+
+/* Scheduler form + Meet link generator */
+.scheduler-form input {
+    padding: 0.6rem;
+    border: 1px solid rgba(0, 0, 0, 0.15);
+    border-radius: 6px;
+    font-family: inherit;
+    width: 100%;
+}
+
+.meet-group .meet-input-row {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.meet-group .meet-input-row input {
+    flex: 1;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.82rem;
+}
+
+.btn-generate {
+    white-space: nowrap;
+    padding: 0.6rem 0.9rem;
+    font-size: 0.82rem;
+}
+
+.field-hint {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+.field-hint.error {
+    color: var(--teach);
+    font-weight: 500;
+}
+
+.confirmed-sessions {
+    margin-top: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.confirmed-sessions:empty { margin-top: 0; }
+
+.confirmed-session-card {
+    border: 1px solid rgba(0, 112, 243, 0.18);
+    background-color: rgba(0, 112, 243, 0.05);
+    border-radius: 8px;
+    padding: 0.9rem 1rem;
+    animation: card-in 0.2s ease;
+}
+
+.confirmed-session-card .session-when {
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.confirmed-session-card .session-link-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+}
+
+.confirmed-session-card .session-link-row a {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.78rem;
+    color: var(--primary-color);
+    font-weight: 600;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.confirmed-session-card .session-link-row button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    flex-shrink: 0;
+}
+
+.confirmed-session-card .session-link-row button:hover {
+    color: var(--text-main);
+}
+
+@media (max-width: 800px) {
+    .requests-container { grid-template-columns: 1fr; }
+}

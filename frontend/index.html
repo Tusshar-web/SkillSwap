@@ -32,10 +32,23 @@
     </header>
 
     <main class="hero">
+
+        <!-- ambient animated decoration, sits behind the text -->
+        <div class="hero-decoration">
+            <div class="ring"></div>
+            <div class="spinner">
+                <div class="node teach">TEACH</div>
+                <div class="node learn">LEARN</div>
+            </div>
+        </div>
+
         <div class="hero-container">
-            <h1>Teach and Learn. <br>Keep the <span>Loop Alive.</span></h1>
-            <p>Connect with passionate people globally. Trade your knowledge in programming, design, languages, and more
-                through direct 1-on-1 sessions.</p>
+
+            <p class="eyebrow"><span class="pulse"></span>Peer-to-peer skill exchange</p>
+
+            <h1>Teach and learn. <br>Keep the <span>loop</span> alive.</h1>
+
+            <p class="lead">Connect with passionate people globally. Trade your knowledge in programming, design, languages, and more through direct 1-on-1 sessions.</p>
 
             <div class="input-container">
                 <input type="email" class="gmail-input" placeholder="Email address">
@@ -46,8 +59,13 @@
                 <a href="explore.html" class="btn btn-primary">Explore Skills</a>
                 <a href="register.html" class="btn btn-outline">How It Works</a>
             </div>
+
         </div>
     </main>
+
+    <div class="marquee-wrap">
+        <div class="marquee-track" id="marquee"></div>
+    </div>
 
     <footer class="footer">
         <p>&copy; 2026 LearnLoop Platform. Built for community learning.</p>

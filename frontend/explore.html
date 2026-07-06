@@ -4,8 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Explore Partners - LearnLoop</title>
-    
-    <!-- Verified Path Links -->
+
     <link rel="stylesheet" href="css/global.css">
     <link rel="stylesheet" href="css/explore.css">
 </head>
@@ -31,11 +30,11 @@
 
     <main class="explore-view">
         <div class="explore-container">
-            
+
             <section class="filter-section">
                 <form class="filter-bar">
                     <input type="text" class="search-input" placeholder="Search skills (e.g., Python, Figma)...">
-                    
+
                     <select class="filter-dropdown">
                         <option value="">Skill Level</option>
                         <option value="beginner">Beginner</option>
@@ -56,8 +55,12 @@
             <section class="results-section">
                 <h2>Recommended Partners</h2>
                 <div class="card-grid">
-                    
-                    <div class="user-card">
+
+                    <div class="user-card"
+                         data-name="Sarah Kapoor"
+                         data-skills="UI/UX Design, Figma, Python"
+                         data-levels="expert, beginner"
+                         data-rating="4.9">
                         <div class="card-header">
                             <div class="card-avatar">SK</div>
                             <div>
@@ -77,11 +80,15 @@
                             </div>
                         </div>
                         <div class="card-footer">
-                            <button class="btn btn-outline btn-full">Request Exchange</button>
+                            <button type="button" class="btn btn-outline btn-full">Request Exchange</button>
                         </div>
                     </div>
 
-                    <div class="user-card">
+                    <div class="user-card"
+                         data-name="Alex Miller"
+                         data-skills="Python, Data Science, Spanish"
+                         data-levels="intermediate, beginner"
+                         data-rating="4.7">
                         <div class="card-header">
                             <div class="card-avatar">AM</div>
                             <div>
@@ -101,7 +108,7 @@
                             </div>
                         </div>
                         <div class="card-footer">
-                            <button class="btn btn-outline btn-full">Request Exchange</button>
+                            <button type="button" class="btn btn-outline btn-full">Request Exchange</button>
                         </div>
                     </div>
 
@@ -115,5 +122,6 @@
         <p>&copy; 2026 LearnLoop Platform. Built for community learning.</p>
     </footer>
 
+    <script src="js/explore.js"></script>
 </body>
 </html>

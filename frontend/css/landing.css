@@ -1,0 +1,249 @@
+/* ---------- HERO ---------- */
+.hero {
+  padding: 5.5rem 1.5rem 3rem;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  background: radial-gradient(circle at top, rgba(0, 112, 243, 0.04) 0%, transparent 65%);
+}
+
+.hero-container {
+  max-width: 720px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 2;
+}
+
+/* ambient decoration — sits BEHIND the text, doesn't push layout around */
+.hero-decoration {
+  position: absolute;
+  top: -40px;
+  right: -60px;
+  width: 320px;
+  height: 320px;
+  z-index: 1;
+  opacity: 0.55;
+  pointer-events: none;
+}
+
+.hero-decoration .ring {
+  position: absolute;
+  inset: 0;
+  border: 1px dashed var(--line);
+  border-radius: 50%;
+}
+
+.hero-decoration .spinner {
+  position: absolute;
+  inset: 0;
+  animation: spin 14s linear infinite;
+}
+
+.hero-decoration .node {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 46px;
+  height: 46px;
+  margin: -23px 0 0 -23px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.5rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: #fff;
+  animation: counter-spin 14s linear infinite;
+}
+
+.hero-decoration .node.teach {
+  background: var(--teach);
+  transform: translate(-110px, 30px);
+}
+
+.hero-decoration .node.learn {
+  background: var(--learn);
+  transform: translate(90px, -50px);
+}
+
+@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+@keyframes counter-spin { from { transform: rotate(0deg); } to { transform: rotate(-360deg); } }
+
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.eyebrow {
+  font-family: 'IBM Plex Mono', monospace;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  opacity: 0;
+  animation: fade-up 0.7s ease forwards;
+  animation-delay: 0.05s;
+}
+
+.eyebrow .pulse {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--learn);
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(1.4); }
+}
+
+.hero h1 {
+  font-family: 'Fraunces', serif;
+  font-size: clamp(2.4rem, 5.5vw, 4rem);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.08;
+  margin: 1rem 0 1.2rem;
+  color: var(--text-main);
+  opacity: 0;
+  animation: fade-up 0.8s ease forwards;
+  animation-delay: 0.15s;
+}
+
+.hero h1 span {
+  font-style: italic;
+  font-weight: 500;
+  background: linear-gradient(92deg, var(--teach), var(--learn));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.hero p.lead {
+  font-size: 1.15rem;
+  color: var(--text-muted);
+  max-width: 540px;
+  margin: 0 auto 2.2rem;
+  opacity: 0;
+  animation: fade-up 0.8s ease forwards;
+  animation-delay: 0.25s;
+}
+
+.input-container {
+  display: flex;
+  max-width: 420px;
+  width: 100%;
+  margin: 0 auto 1.4rem;
+  opacity: 0;
+  animation: fade-up 0.8s ease forwards;
+  animation-delay: 0.35s;
+}
+
+.gmail-input {
+  width: 100%;
+  max-width: 400px;
+  box-sizing: border-box;
+}
+
+.input-container input {
+  flex: 1;
+  padding: 0.85rem 1.1rem;
+  font-size: 0.95rem;
+  font-family: inherit;
+  border: 1px solid var(--line);
+  background: #ffffff;
+  border-radius: 100px 0 0 100px;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.input-container input:focus {
+  border-color: var(--text-main);
+  box-shadow: 0 0 0 3px rgba(0, 112, 243, 0.12);
+}
+
+.input-container button {
+  padding: 0.85rem 1.6rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  border-radius: 0 100px 100px 0;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.input-container button:hover {
+  background-color: var(--primary-hover);
+}
+
+.hero-buttons {
+  display: flex;
+  gap: 0.9rem;
+  justify-content: center;
+  margin-bottom: 3.5rem;
+  opacity: 0;
+  animation: fade-up 0.8s ease forwards;
+  animation-delay: 0.45s;
+}
+
+.hero-buttons .btn {
+  padding: 0.8rem 1.7rem;
+  font-size: 1rem;
+}
+
+/* ---------- MARQUEE ---------- */
+.marquee-wrap {
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+  padding: 1.2rem 0 5rem;
+}
+
+.marquee-track {
+  display: flex;
+  gap: 0.9rem;
+  width: max-content;
+  animation: scroll-left 32s linear infinite;
+}
+
+@keyframes scroll-left {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+.pair-pill {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.55rem 1.1rem;
+  border-radius: 100px;
+  background: #ffffff;
+  border: 1px solid var(--line);
+  font-size: 0.85rem;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.pair-pill .dot { width: 6px; height: 6px; border-radius: 50%; }
+.pair-pill .dot.teach { background: var(--teach); }
+.pair-pill .dot.learn { background: var(--learn); }
+.pair-pill .arrow { color: var(--text-muted); font-size: 0.75rem; }
+
+@media (max-width: 768px) {
+  .hero { padding: 3rem 1.2rem 1.5rem; }
+  .hero-decoration { opacity: 0.3; width: 220px; height: 220px; right: -80px; }
+  .hero-buttons { flex-direction: column; align-items: center; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .marquee-track { animation: none; }
+  .hero-decoration .spinner, .hero-decoration .node { animation: none; }
+}

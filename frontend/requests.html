@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Exchange Requests - LearnLoop</title>
-    
+
     <!-- Verified Path Links -->
     <link rel="stylesheet" href="css/global.css">
     <link rel="stylesheet" href="css/requests.css">
@@ -31,40 +31,28 @@
 
     <main class="requests-view">
         <div class="requests-container">
-            
+
             <section class="requests-box">
                 <h2>Skill Exchange Requests</h2>
-                
+
                 <div class="requests-tabs">
-                    <button class="tab-btn active">Pending (1)</button>
-                    <button class="tab-btn">Accepted</button>
-                    <button class="tab-btn">Rejected</button>
+                    <button class="tab-btn active" data-tab="pending">Pending <span class="tab-count" id="count-pending">0</span></button>
+                    <button class="tab-btn" data-tab="accepted">Accepted <span class="tab-count" id="count-accepted">0</span></button>
+                    <button class="tab-btn" data-tab="rejected">Rejected <span class="tab-count" id="count-rejected">0</span></button>
                 </div>
 
-                <div class="requests-list">
-                    
-                    <div class="request-card">
-                        <div class="request-user-info">
-                            <div class="request-avatar">SK</div>
-                            <div>
-                                <h3>Sarah Kapoor</h3>
-                                <p>wants to learn <strong>UI/UX Design</strong> from you in exchange for <strong>Python</strong></p>
-                            </div>
-                        </div>
-                        <div class="request-actions">
-                            <button class="btn btn-primary">Accept</button>
-                            <button class="btn btn-outline">Reject</button>
-                        </div>
-                    </div>
-
+                <div class="requests-list" id="requests-list">
+                    <!-- Request cards are rendered here by requests.js -->
                 </div>
+
+                <p class="empty-state" id="empty-state" hidden>Nothing here yet.</p>
             </section>
 
             <section class="scheduler-modal-box">
                 <h3>Schedule Learning Session</h3>
-                <p>Select your preferred date and time to lock in your 1-on-1 exchange session loop.</p>
-                
-                <form class="scheduler-form">
+                <p>Select your preferred date and time, then attach a Google Meet link so both of you can join straight from your confirmation.</p>
+
+                <form class="scheduler-form" id="scheduler-form">
                     <div class="form-group">
                         <label for="session-date">Preferred Date</label>
                         <input type="date" id="session-date" required>
@@ -73,8 +61,22 @@
                         <label for="session-time">Preferred Time</label>
                         <input type="time" id="session-time" required>
                     </div>
+
+                    <div class="form-group meet-group">
+                        <label for="meet-link">Google Meet Link</label>
+                        <div class="meet-input-row">
+                            <input type="url" id="meet-link" placeholder="https://meet.google.com/abc-defg-hij">
+                            <button type="button" class="btn btn-outline btn-generate" id="generate-meet-link">Generate</button>
+                        </div>
+                        <span class="field-hint" id="meet-link-hint">Paste an existing link or generate a placeholder one.</span>
+                    </div>
+
                     <button type="submit" class="btn btn-primary btn-full">Confirm Session Block</button>
                 </form>
+
+                <div class="confirmed-sessions" id="confirmed-sessions">
+                    <!-- Confirmed sessions rendered here by requests.js -->
+                </div>
             </section>
 
         </div>

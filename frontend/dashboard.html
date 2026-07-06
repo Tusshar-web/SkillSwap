@@ -4,8 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard - LearnLoop</title>
-    
-    <!-- Verified Path Links -->
+
     <link rel="stylesheet" href="css/global.css">
     <link rel="stylesheet" href="css/dashboard.css">
 </head>
@@ -31,7 +30,7 @@
 
     <main class="dashboard-view">
         <div class="dashboard-container">
-            
+
             <section class="welcome-banner">
                 <h1>Welcome back, Learner!</h1>
                 <p>Ready to complete your learning loop today?</p>
@@ -40,28 +39,45 @@
             <section class="stats-grid">
                 <div class="stat-card">
                     <h3>Total Offered</h3>
-                    <div class="stat-number">4</div>
+                    <div class="stat-number" data-target="4">0</div>
                     <p>Skills you teach</p>
                 </div>
                 <div class="stat-card">
                     <h3>Total Wanted</h3>
-                    <div class="stat-number">3</div>
+                    <div class="stat-number" data-target="3">0</div>
                     <p>Skills you learn</p>
                 </div>
                 <div class="stat-card">
                     <h3>Exchanges</h3>
-                    <div class="stat-number">12</div>
+                    <div class="stat-number" data-target="12">0</div>
                     <p>Completed sessions</p>
                 </div>
                 <div class="stat-card">
                     <h3>Average Rating</h3>
-                    <div class="stat-number">4.9</div>
+                    <div class="stat-number" data-target="4.9">0</div>
                     <p>Based on reviews</p>
                 </div>
             </section>
 
+            <section class="analytics-grid">
+                <div class="chart-card">
+                    <h2>Session Activity</h2>
+                    <p class="chart-subtitle">Sessions completed over the last 6 months</p>
+                    <canvas id="sessionsChart" height="150"></canvas>
+                </div>
+                <div class="chart-card">
+                    <h2>Skill Balance</h2>
+                    <p class="chart-subtitle">Offered vs. wanted skills</p>
+                    <canvas id="balanceChart" height="150"></canvas>
+                    <div class="chart-legend">
+                        <span><span class="dot teach"></span>Offered</span>
+                        <span><span class="dot learn"></span>Wanted</span>
+                    </div>
+                </div>
+            </section>
+
             <div class="dashboard-split">
-                
+
                 <section class="badge-section">
                     <h2>Achievements & Badges</h2>
                     <div class="badge-grid">
@@ -109,5 +125,7 @@
         <p>&copy; 2026 LearnLoop Platform. Built for community learning.</p>
     </footer>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js"></script>
+    <script src="js/dashboard.js"></script>
 </body>
 </html>

@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Profile - LearnLoop</title>
+
+    <link rel="stylesheet" href="css/global.css">
+    <link rel="stylesheet" href="css/profile.css">
+</head>
+<body>
+
+    <header class="navbar">
+        <div class="nav-container">
+            <a href="index.html" class="logo">
+                <span class="logo-icon"></span>
+                <span>Learn<span>Loop</span></span>
+            </a>
+            <nav class="nav-menu">
+                <a href="explore.html">Explore</a>
+                <a href="dashboard.html">Dashboard</a>
+                <a href="requests.html">Requests</a>
+                <a href="chat.html">Messages</a>
+            </nav>
+            <div class="nav-actions">
+                <span class="dashboard-avatar">JL</span>
+            </div>
+        </div>
+    </header>
+
+    <main class="profile-view">
+        <div class="profile-container">
+
+            <!-- IDENTITY CARD: photo, name, headline, location -->
+            <section class="profile-card identity-card">
+                <div class="identity-layout">
+                    <div class="photo-upload">
+                        <div class="photo-frame" id="photo-frame">
+                            <span class="photo-placeholder" id="photo-placeholder">JL</span>
+                            <img id="photo-preview" alt="Profile photo" hidden>
+                        </div>
+                        <label for="photo-input" class="btn btn-outline btn-photo">Change photo</label>
+                        <input type="file" id="photo-input" accept="image/*" hidden>
+                        <button type="button" class="link-btn" id="photo-remove" hidden>Remove photo</button>
+                    </div>
+
+                    <form class="identity-form">
+                        <div class="identity-form-grid">
+                            <div class="form-group">
+                                <label for="full-name">Full Name</label>
+                                <input type="text" id="full-name" placeholder="Jordan Lee" value="Jordan Lee">
+                            </div>
+                            <div class="form-group">
+                                <label for="headline">Headline</label>
+                                <input type="text" id="headline" placeholder="e.g., Product Designer teaching UI/UX, learning Python" value="Product Designer · Teaching UI/UX &amp; Figma">
+                            </div>
+                            <div class="form-group">
+                                <label for="location">Location</label>
+                                <input type="text" id="location" placeholder="City, Country" value="Guwahati, India">
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Save Profile Info</button>
+                    </form>
+                </div>
+            </section>
+
+            <!-- BIO -->
+            <section class="profile-card">
+                <h2>About</h2>
+                <form class="profile-form">
+                    <div class="form-group">
+                        <label for="bio">Short Bio</label>
+                        <textarea id="bio" rows="4" placeholder="Tell the community about yourself, your background, and your learning goals..."></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Save Bio</button>
+                </form>
+            </section>
+
+            <!-- SKILLS -->
+            <div class="skill-management-grid">
+
+                <section class="skill-box offered">
+                    <h3>Skills Offered (To Teach)</h3>
+                    <form class="add-skill-form">
+                        <input type="text" placeholder="e.g., Web Development" required>
+                        <select required>
+                            <option value="Beginner">Beginner</option>
+                            <option value="Intermediate">Intermediate</option>
+                            <option value="Expert">Expert</option>
+                        </select>
+                        <button type="submit" class="btn btn-primary">Add</button>
+                    </form>
+
+                    <ul class="managed-skills-list">
+                        <li>
+                            <span>UI/UX Design — <span class="level-pill expert">Expert</span></span>
+                            <button type="button" class="remove-skill-btn" aria-label="Remove UI/UX Design">&times;</button>
+                        </li>
+                        <li>
+                            <span>Figma — <span class="level-pill expert">Expert</span></span>
+                            <button type="button" class="remove-skill-btn" aria-label="Remove Figma">&times;</button>
+                        </li>
+                    </ul>
+                </section>
+
+                <section class="skill-box wanted">
+                    <h3>Skills Wanted (To Learn)</h3>
+                    <form class="add-skill-form">
+                        <input type="text" placeholder="e.g., French Language" required>
+                        <select required>
+                            <option value="Beginner">Beginner</option>
+                            <option value="Intermediate">Intermediate</option>
+                            <option value="Expert">Expert</option>
+                        </select>
+                        <button type="submit" class="btn btn-primary">Add</button>
+                    </form>
+
+                    <ul class="managed-skills-list">
+                        <li>
+                            <span>Python — <span class="level-pill beginner">Beginner</span></span>
+                            <button type="button" class="remove-skill-btn" aria-label="Remove Python">&times;</button>
+                        </li>
+                    </ul>
+                </section>
+
+            </div>
+
+            <!-- EXPERIENCE + EDUCATION -->
+            <div class="skill-management-grid">
+
+                <section class="skill-box experience" data-entry-type="experience">
+                    <h3>Experience</h3>
+                    <form class="add-entry-form">
+                        <input type="text" data-field="title" placeholder="Role, e.g., Product Designer" required>
+                        <input type="text" data-field="subtitle" placeholder="Company" required>
+                        <input type="text" data-field="meta" placeholder="e.g., 2023 – Present">
+                        <textarea data-field="description" rows="2" placeholder="What did you work on?"></textarea>
+                        <button type="submit" class="btn btn-primary btn-full">Add Experience</button>
+                    </form>
+                    <ul class="managed-entries-list" data-list="experience"></ul>
+                </section>
+
+                <section class="skill-box education" data-entry-type="education">
+                    <h3>Education</h3>
+                    <form class="add-entry-form">
+                        <input type="text" data-field="title" placeholder="Degree, e.g., B.Des Interaction Design" required>
+                        <input type="text" data-field="subtitle" placeholder="School / University" required>
+                        <input type="text" data-field="meta" placeholder="e.g., 2018 – 2022">
+                        <textarea data-field="description" rows="2" placeholder="Notes, honors, coursework..."></textarea>
+                        <button type="submit" class="btn btn-primary btn-full">Add Education</button>
+                    </form>
+                    <ul class="managed-entries-list" data-list="education"></ul>
+                </section>
+
+            </div>
+
+            <!-- CERTIFICATES + ACHIEVEMENTS -->
+            <div class="skill-management-grid">
+
+                <section class="skill-box certificates" data-entry-type="certificates">
+                    <h3>Certificates</h3>
+                    <form class="add-entry-form">
+                        <input type="text" data-field="title" placeholder="Certificate name" required>
+                        <input type="text" data-field="subtitle" placeholder="Issuing organization" required>
+                        <input type="text" data-field="meta" placeholder="Issued date, e.g., Jun 2025">
+                        <input type="url" data-field="link" placeholder="Credential URL (optional)">
+                        <button type="submit" class="btn btn-primary btn-full">Add Certificate</button>
+                    </form>
+                    <ul class="managed-entries-list" data-list="certificates"></ul>
+                </section>
+
+                <section class="skill-box achievements" data-entry-type="achievements">
+                    <h3>Achievements</h3>
+                    <form class="add-entry-form">
+                        <input type="text" data-field="title" placeholder="Achievement, e.g., Hackathon Winner" required>
+                        <input type="text" data-field="meta" placeholder="e.g., 2024">
+                        <textarea data-field="description" rows="2" placeholder="What made this stand out?"></textarea>
+                        <button type="submit" class="btn btn-primary btn-full">Add Achievement</button>
+                    </form>
+                    <ul class="managed-entries-list" data-list="achievements"></ul>
+                </section>
+
+            </div>
+
+        </div>
+    </main>
+
+    <footer class="footer">
+        <p>&copy; 2026 LearnLoop Platform. Built for community learning.</p>
+    </footer>
+
+    <script src="js/profile.js"></script>
+</body>
+</html>
