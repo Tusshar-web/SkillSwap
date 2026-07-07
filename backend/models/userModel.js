@@ -19,7 +19,53 @@ const createUser = async (full_name, email, password_hash) => {
     return result;
 };
 
+    const getUserById = async (id) => {
+    const [rows] = await db.execute(
+        `SELECT id,
+                full_name,
+                email,
+                bio,
+                location,
+                profile_picture,
+                created_at
+         FROM users
+         WHERE id = ?`,
+        [id]
+    );
+
+    return rows[0];
+};
+
+    const updateUserProfile = async (
+    id,
+    full_name,
+    bio,
+    location,
+    profile_picture
+) => {
+
+    const [result] = await db.execute(
+        `UPDATE users
+         SET full_name = ?,
+             bio = ?,
+             location = ?,
+             profile_picture = ?
+         WHERE id = ?`,
+        [
+            full_name,
+            bio,
+            location,
+            profile_picture,
+            id
+        ]
+    );
+
+    return result;
+};
+
 module.exports = {
     findUserByEmail,
-    createUser
+    createUser,
+    getUserById,
+    updateUserProfile
 };
