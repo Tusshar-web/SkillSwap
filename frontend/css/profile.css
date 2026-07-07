@@ -79,6 +79,40 @@
     padding: 2rem;
 }
 
+.identity-card-topbar {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 1rem;
+}
+
+.btn-edit-toggle {
+    font-size: 0.85rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    transition: background-color 0.18s ease, border-color 0.18s ease, color 0.18s ease;
+}
+
+.btn-edit-toggle.is-active {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+    color: #ffffff;
+}
+
+.edit-icon { font-size: 0.9rem; }
+
+.identity-form input[readonly] {
+    background-color: var(--background-accent);
+    border-color: transparent;
+    color: var(--text-main);
+    cursor: default;
+}
+
+.identity-form input:not([readonly]) {
+    background-color: #ffffff;
+    border-color: rgba(0, 0, 0, 0.15);
+}
+
 .identity-layout {
     display: flex;
     gap: 2rem;

@@ -211,6 +211,13 @@ a {
   justify-content: center;
   font-weight: 600;
   font-size: 0.9rem;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.dashboard-avatar:hover {
+  transform: scale(1.08);
+  box-shadow: 0 6px 16px rgba(0, 112, 243, 0.35);
 }
 
 /* FOOTER MARGIN PANELS */

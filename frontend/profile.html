@@ -23,7 +23,7 @@
                 <a href="chat.html">Messages</a>
             </nav>
             <div class="nav-actions">
-                <span class="dashboard-avatar">JL</span>
+                <a href="profile.html" class="dashboard-avatar" aria-label="Go to my profile">JL</a>
             </div>
         </div>
     </header>
@@ -32,14 +32,19 @@
         <div class="profile-container">
 
             <!-- IDENTITY CARD: photo, name, headline, location -->
-            <section class="profile-card identity-card">
+            <section class="profile-card identity-card" id="identity-card">
+                <div class="identity-card-topbar">
+                    <button type="button" class="btn btn-outline btn-edit-toggle" id="edit-profile-btn">
+                        <span class="edit-icon">✎</span> Edit Profile
+                    </button>
+                </div>
                 <div class="identity-layout">
                     <div class="photo-upload">
                         <div class="photo-frame" id="photo-frame">
                             <span class="photo-placeholder" id="photo-placeholder">JL</span>
                             <img id="photo-preview" alt="Profile photo" hidden>
                         </div>
-                        <label for="photo-input" class="btn btn-outline btn-photo">Change photo</label>
+                        <label for="photo-input" class="btn btn-outline btn-photo" id="photo-label">Change photo</label>
                         <input type="file" id="photo-input" accept="image/*" hidden>
                         <button type="button" class="link-btn" id="photo-remove" hidden>Remove photo</button>
                     </div>
@@ -48,18 +53,18 @@
                         <div class="identity-form-grid">
                             <div class="form-group">
                                 <label for="full-name">Full Name</label>
-                                <input type="text" id="full-name" placeholder="Jordan Lee" value="Jordan Lee">
+                                <input type="text" id="full-name" placeholder="Jordan Lee" value="Jordan Lee" readonly>
                             </div>
                             <div class="form-group">
                                 <label for="headline">Headline</label>
-                                <input type="text" id="headline" placeholder="e.g., Product Designer teaching UI/UX, learning Python" value="Product Designer · Teaching UI/UX &amp; Figma">
+                                <input type="text" id="headline" placeholder="e.g., Product Designer teaching UI/UX, learning Python" value="Product Designer · Teaching UI/UX &amp; Figma" readonly>
                             </div>
                             <div class="form-group">
                                 <label for="location">Location</label>
-                                <input type="text" id="location" placeholder="City, Country" value="Guwahati, India">
+                                <input type="text" id="location" placeholder="City, Country" value="Guwahati, India" readonly>
                             </div>
                         </div>
-                        <button type="submit" class="btn btn-primary">Save Profile Info</button>
+                        <button type="submit" class="btn btn-primary" id="identity-save-btn">Save Profile Info</button>
                     </form>
                 </div>
             </section>
