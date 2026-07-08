@@ -9,9 +9,15 @@ require("dotenv").config();
 
 require("./config/db");
 
-
+//Routes registering
 const authRoutes = require("./routes/authRoutes");
 app.use("/api/auth", authRoutes);
+const userRoutes = require("./routes/userRoutes");
+app.use("/api/users", userRoutes);
+const skillRoutes = require("./routes/skillRoutes");
+app.use("/api/skills", skillRoutes);
+const userSkillRoutes = require("./routes/userSkillRoutes");
+app.use("/api/user-skills", userSkillRoutes);
 
 const authMiddleware = require("./middleware/authMiddleware");
 
