@@ -3,16 +3,18 @@ const db = require("../config/db");
 const addUserSkill = async (
     user_id,
     skill_id,
+    skill_type,
     proficiency,
     description
 ) => {
     const [result] = await db.execute(
         `INSERT INTO user_skills
-        (user_id, skill_id, proficiency, description)
-        VALUES (?, ?, ?, ?)`,
+        (user_id, skill_id, skill_type, proficiency, description)
+        VALUES (?, ?, ?, ?, ?)`,
         [
             user_id,
             skill_id,
+            skill_type,
             proficiency,
             description
         ]
@@ -28,6 +30,27 @@ const skillExists = async (skill_id) => {
     );
 
     return rows.length > 0;
+};
+
+const getSkillByName = async (skill_name) => {
+    const [rows] = await db.execute(
+        `SELECT skill_id
+         FROM skills
+         WHERE LOWER(skill_name) = LOWER(?)`,
+        [skill_name]
+    );
+
+    return rows[0];
+};
+
+const createSkill = async (skill_name) => {
+    const [result] = await db.execute(
+        `INSERT INTO skills (skill_name)
+         VALUES (?)`,
+        [skill_name]
+    );
+
+    return result.insertId;
 };
 
 const userAlreadyHasSkill = async (user_id, skill_id) => {
@@ -47,6 +70,7 @@ const getUserSkills = async (user_id) => {
             us.user_skill_id,
             s.skill_id,
             s.skill_name,
+            us.skill_type,
             us.proficiency,
             us.description,
             us.created_at
@@ -101,5 +125,7 @@ module.exports = {
     userAlreadyHasSkill,
     getUserSkills,
     updateUserSkill,
-    deleteUserSkill
+    deleteUserSkill,
+    getSkillByName,
+    createSkill
 };

@@ -18,6 +18,8 @@ const skillRoutes = require("./routes/skillRoutes");
 app.use("/api/skills", skillRoutes);
 const userSkillRoutes = require("./routes/userSkillRoutes");
 app.use("/api/user-skills", userSkillRoutes);
+const searchRoutes = require("./routes/searchRoutes");
+app.use("/api/search", searchRoutes);
 
 const authMiddleware = require("./middleware/authMiddleware");
 
