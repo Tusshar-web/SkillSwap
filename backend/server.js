@@ -20,7 +20,10 @@ const userSkillRoutes = require("./routes/userSkillRoutes");
 app.use("/api/user-skills", userSkillRoutes);
 const searchRoutes = require("./routes/searchRoutes");
 app.use("/api/search", searchRoutes);
+const swapRequestRoutes = require("./routes/swapRequestRoutes");
+app.use("/api/swap", swapRequestRoutes);
 
+// Protected Route
 const authMiddleware = require("./middleware/authMiddleware");
 
 app.get("/test", authMiddleware, (req, res) => {
