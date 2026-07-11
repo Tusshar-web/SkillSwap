@@ -359,6 +359,19 @@ function initWhiteboard() {
   canvas.addEventListener("mouseup", stopDrawing);
   canvas.addEventListener("mouseleave", stopDrawing);
 
+  // Mobile Touch Support
+  canvas.addEventListener("touchstart", (e) => {
+    if (e.cancelable) e.preventDefault();
+    startDrawing(e);
+  }, { passive: false });
+
+  canvas.addEventListener("touchmove", (e) => {
+    if (e.cancelable) e.preventDefault();
+    drawLine(e);
+  }, { passive: false });
+
+  canvas.addEventListener("touchend", stopDrawing);
+
   const swatches = document.querySelectorAll(".color-swatch");
   swatches.forEach(sw => {
     sw.addEventListener("click", () => {
@@ -391,6 +404,7 @@ function resizeCanvas() {
   tempCtx.drawImage(canvas, 0, 0);
 
   canvas.width = wrapper.clientWidth;
+  canvas.height = 280; // Correct internal height to match CSS rendering height
   ctx.drawImage(tempCanvas, 0, 0);
   
   ctx.lineCap = "round";
@@ -401,7 +415,9 @@ function startDrawing(e) {
   drawing = true;
   ctx.beginPath();
   const rect = e.target.getBoundingClientRect();
-  ctx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
+  const clientX = (e.touches && e.touches.length > 0) ? e.touches[0].clientX : e.clientX;
+  const clientY = (e.touches && e.touches.length > 0) ? e.touches[0].clientY : e.clientY;
+  ctx.moveTo(clientX - rect.left, clientY - rect.top);
 }
 
 function drawLine(e) {
@@ -411,7 +427,10 @@ function drawLine(e) {
   ctx.lineWidth = penSize;
   ctx.lineCap = "round";
   ctx.lineJoin = "round";
-  ctx.lineTo(e.clientX - rect.left, e.clientY - rect.top);
+  
+  const clientX = (e.touches && e.touches.length > 0) ? e.touches[0].clientX : e.clientX;
+  const clientY = (e.touches && e.touches.length > 0) ? e.touches[0].clientY : e.clientY;
+  ctx.lineTo(clientX - rect.left, clientY - rect.top);
   ctx.stroke();
 }
 

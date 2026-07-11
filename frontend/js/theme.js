@@ -380,6 +380,14 @@ function setupTheme() {
   const savedTheme = localStorage.getItem("ll_theme") || "dark";
   document.documentElement.setAttribute("data-theme", savedTheme);
   renderThemeIcons();
+
+  // Restore sidebar collapsed state
+  const layout = document.querySelector(".dashboard-layout");
+  const sidebar = document.querySelector(".sidebar");
+  if (layout && sidebar && localStorage.getItem("ll_sidebar_collapsed") === "true") {
+    layout.classList.add("sidebar-collapsed");
+    sidebar.classList.add("collapsed");
+  }
 }
 
 function renderThemeIcons() {
@@ -528,16 +536,32 @@ function setupBackToTop() {
 
 // Hamburger Navigation Toggle (Mobile)
 function setupMobileToggle() {
-  const toggle = document.querySelector(".mobile-nav-toggle");
-  const navLinks = document.querySelector(".nav-links");
-  const sidebar = document.querySelector(".sidebar");
-  
-  if (toggle && navLinks) {
-    toggle.addEventListener("click", () => {
-      navLinks.classList.toggle("active");
-      if (sidebar) sidebar.classList.toggle("active");
-    });
-  }
+  document.addEventListener("click", (e) => {
+    // 1. Landing Page Toggle (using Event Delegation)
+    const landingToggle = e.target.closest(".mobile-nav-toggle");
+    if (landingToggle) {
+      const navLinks = document.querySelector(".nav-links");
+      if (navLinks) {
+        navLinks.classList.toggle("active");
+      }
+    }
+
+    // 2. Logged-In Pages Sidebar Toggle (using Event Delegation)
+    const sidebarToggle = e.target.closest("#mobile-sidebar-toggle");
+    const sidebarOverlay = e.target.closest("#sidebar-overlay");
+    const sidebar = document.querySelector(".sidebar");
+
+    if (sidebarToggle && sidebar) {
+      sidebar.classList.toggle("active");
+      const overlay = document.getElementById("sidebar-overlay");
+      if (overlay) overlay.classList.toggle("active");
+    }
+
+    if (sidebarOverlay && sidebar) {
+      sidebar.classList.remove("active");
+      sidebarOverlay.classList.remove("active");
+    }
+  });
 }
 
 function getAvatarHTML(user, className = "avatar-img") {
@@ -621,57 +645,76 @@ function getSidebarHTML(activePage) {
   const user = db.getCurrentUser();
   if (!user) return "";
   
+  const isCollapsed = localStorage.getItem("ll_sidebar_collapsed") === "true";
+  
   return `
-    <aside class="sidebar">
-      <a href="index.html" class="sidebar-logo">
-        <svg viewBox="0 0 44 24" width="44" height="28" fill="none" style="flex-shrink:0;">
-          <circle cx="14" cy="12" r="8" stroke="var(--logo-purple)" stroke-width="3.5" />
-          <circle cx="27" cy="12" r="8" stroke="var(--logo-grey)" stroke-width="3.5" stroke-opacity="0.9" />
-        </svg>
-        <span>LearnLoop</span>
-      </a>
+    <!-- Mobile Header Bar -->
+    <div class="mobile-header-bar">
+      <button class="mobile-sidebar-toggle" id="mobile-sidebar-toggle" aria-label="Toggle Sidebar">
+        <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+      </button>
+      <div class="mobile-logo-text">LearnLoop</div>
+      <div class="mobile-avatar-wrap">${getAvatarHTML(user)}</div>
+    </div>
+    
+    <!-- Sidebar Overlay -->
+    <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+    <aside class="sidebar ${isCollapsed ? 'collapsed' : ''}">
+      <div class="sidebar-header">
+        <a href="index.html" class="sidebar-logo">
+          <svg viewBox="0 0 44 24" width="44" height="28" fill="none" style="flex-shrink:0;">
+            <circle cx="14" cy="12" r="8" stroke="var(--logo-purple)" stroke-width="3.5" />
+            <circle cx="27" cy="12" r="8" stroke="var(--logo-grey)" stroke-width="3.5" stroke-opacity="0.9" />
+          </svg>
+          <span class="logo-name">LearnLoop</span>
+        </a>
+        <button class="sidebar-collapse-btn" id="desktop-sidebar-collapse-btn" aria-label="Collapse Sidebar">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+        </button>
+      </div>
       <ul class="sidebar-menu">
         <li class="sidebar-item ${activePage === 'dashboard' ? 'active' : ''}">
           <a href="dashboard.html">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>
-            Dashboard
+            <span>Dashboard</span>
           </a>
         </li>
         <li class="sidebar-item ${activePage === 'feed' ? 'active' : ''}">
           <a href="feed.html">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-            Community Feed
+            <span>Community Feed</span>
           </a>
         </li>
         <li class="sidebar-item ${activePage === 'explore' ? 'active' : ''}">
           <a href="explore.html">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-            Find Partners
+            <span>Find Partners</span>
           </a>
         </li>
         <li class="sidebar-item ${activePage === 'requests' ? 'active' : ''}">
           <a href="requests.html">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-            Requests & Calendar
+            <span>Requests & Calendar</span>
           </a>
         </li>
         <li class="sidebar-item ${activePage === 'chat' ? 'active' : ''}">
           <a href="chat.html">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
-            Messaging
+            <span>Messaging</span>
           </a>
         </li>
         <li class="sidebar-item ${activePage === 'profile' ? 'active' : ''}">
           <a href="profile.html">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
-            My Profile
+            <span>My Profile</span>
           </a>
         </li>
       </ul>
       <div class="sidebar-footer" style="display:flex; align-items:center; justify-content:space-between; width:100%; gap:8px;">
         <a href="profile.html" class="sidebar-user" style="display:flex; align-items:center; gap:12px; text-decoration:none; flex-grow:1; min-width:0;">
           <div class="sidebar-user-avatar" style="flex-shrink:0;">${getAvatarHTML(user)}</div>
-          <div class="sidebar-user-info" style="display:flex; flex-direction:column; overflow:hidden;">
+          <div class="sidebar-user-info user-details" style="display:flex; flex-direction:column; overflow:hidden;">
             <span class="sidebar-user-name" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; font-weight:600; color:var(--text-primary); font-size:13.5px;">${user.name}</span>
             <span class="sidebar-user-role" style="font-size:11.5px; color:var(--text-muted);">View Profile</span>
           </div>
@@ -698,5 +741,17 @@ function forceAuth() {
 document.addEventListener("click", (e) => {
   if (e.target.closest(".logout-btn")) {
     db.logout();
+  }
+
+  // Collapse sidebar toggle click
+  const collapseBtn = e.target.closest("#desktop-sidebar-collapse-btn");
+  if (collapseBtn) {
+    const layout = document.querySelector(".dashboard-layout");
+    const sidebar = document.querySelector(".sidebar");
+    if (layout && sidebar) {
+      const isCollapsed = layout.classList.toggle("sidebar-collapsed");
+      sidebar.classList.toggle("collapsed");
+      localStorage.setItem("ll_sidebar_collapsed", isCollapsed ? "true" : "false");
+    }
   }
 });
