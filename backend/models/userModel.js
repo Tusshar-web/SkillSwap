@@ -63,9 +63,28 @@ const createUser = async (full_name, email, password_hash) => {
     return result;
 };
 
+const getUserProfile = async (userId) => {
+    const [rows] = await db.execute(
+        `SELECT
+            id,
+            full_name,
+            email,
+            bio,
+            location,
+            profile_picture,
+            created_at
+         FROM users
+         WHERE id = ?`,
+        [userId]
+    );
+
+    return rows[0];
+};
+
 module.exports = {
     findUserByEmail,
     createUser,
     getUserById,
-    updateUserProfile
+    updateUserProfile,
+    getUserProfile
 };

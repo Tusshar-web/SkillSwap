@@ -1,31 +1,31 @@
-const {getUserById} = require("../models/userModel");
-const { updateUserProfile } = require("../models/userModel");
+const {
+  getUserById,
+  updateUserProfile,
+  getUserProfile,
+} = require("../models/userModel");
 
 const getProfile = async (req, res) => {
-    
-    try {
-        const user = await getUserById(req.user.id);
-        if(!user) {
-            return res.status(404).json({
-                message : "User not found"
-            });
-        }
-
-        res.status(200).json({
-            success : true,
-            user
-        });
-    } catch (err) {
-        console.error(err);
-        return res.status(500).json({
-            message : err.message
-        });
+  try {
+    const user = await getUserById(req.user.id);
+    if (!user) {
+      return res.status(404).json({
+        message: "User not found",
+      });
     }
+
+    res.status(200).json({
+      success: true,
+      user,
+    });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({
+      message: err.message,
+    });
+  }
 };
 
-
 const updateProfile = async (req, res) => {
-
     try {
 
         const {
@@ -35,33 +35,72 @@ const updateProfile = async (req, res) => {
             profile_picture
         } = req.body;
 
-        await updateUserProfile(
+        if (!full_name) {
+            return res.status(400).json({
+                success: false,
+                message: "Full name is required."
+            });
+        }
+
+        const result = await updateUserProfile(
             req.user.id,
             full_name,
-            bio,
-            location,
-            profile_picture
+            bio ?? null,
+            location ?? null,
+            profile_picture ?? null
         );
 
-        res.status(200).json({
+        if (result.affectedRows === 0) {
+            return res.status(404).json({
+                success: false,
+                message: "User not found."
+            });
+        }
+
+        return res.status(200).json({
             success: true,
             message: "Profile updated successfully"
         });
 
     } catch (err) {
 
-        res.status(500).json({
+        console.error(err);
+
+        return res.status(500).json({
+            success: false,
             message: err.message
         });
 
     }
-
 };
 
+const getMyProfile = async (req, res) => {
+  try {
+    const user = await getUserProfile(req.user.id);
 
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found.",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      data: user,
+    });
+  } catch (err) {
+    console.error(err);
+
+    return res.status(500).json({
+      success: false,
+      message: err.message,
+    });
+  }
+};
 
 module.exports = {
-    getProfile,
-    updateProfile
+  getProfile,
+  updateProfile,
+  getMyProfile,
 };
-
