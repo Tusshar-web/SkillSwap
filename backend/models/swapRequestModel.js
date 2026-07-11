@@ -232,6 +232,50 @@ const cancelSwapRequest = async (
 
 };
 
+const getAcceptedConversations = async (userId) => {
+
+    const [rows] = await db.execute(
+
+        `SELECT
+            er.request_id,
+
+            CASE
+                WHEN er.sender_id = ?
+                THEN receiver.id
+                ELSE sender.id
+            END AS partner_id,
+
+            CASE
+                WHEN er.sender_id = ?
+                THEN receiver.full_name
+                ELSE sender.full_name
+            END AS partner_name
+
+        FROM exchange_requests er
+
+        JOIN users sender
+            ON sender.id = er.sender_id
+
+        JOIN users receiver
+            ON receiver.id = er.receiver_id
+
+        WHERE
+            (er.sender_id = ? OR er.receiver_id = ?)
+            AND er.status = 'Accepted'`,
+
+        [
+            userId,
+            userId,
+            userId,
+            userId
+        ]
+
+    );
+
+    return rows;
+
+};
+
 module.exports = {
     getUserSkill,
     pendingRequestExists,
@@ -241,6 +285,6 @@ module.exports = {
     getRequestById,
     acceptSwapRequest,
     rejectSwapRequest,
-    cancelSwapRequest
-
+    cancelSwapRequest,
+    getAcceptedConversations
 };

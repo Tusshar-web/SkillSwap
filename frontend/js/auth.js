@@ -87,110 +87,125 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // 3. Login Submission Logic
-  const loginForm = document.getElementById("login-form");
-  if (loginForm) {
-    loginForm.addEventListener("submit", (e) => {
-      e.preventDefault();
-      
-      const email = document.getElementById("login-email").value.trim();
-      const password = document.getElementById("login-password").value;
-      
-      const usersList = db.getData("ll_users");
-      
-      let foundUser = usersList.find(u => u.email === email);
-      
-      if (!foundUser) {
-        const mockMatch = MOCK_USERS.find(mu => {
-          const formattedEmail = mu.name.toLowerCase().replace(" ", "") + "@learnloop.com";
-          return formattedEmail === email;
-        });
-        if (mockMatch) {
-          foundUser = mockMatch;
-        }
-      }
+  // 3. Login Submission Logic
+const loginForm = document.getElementById("login-form");
 
-      if (foundUser && (password === "password" || foundUser.password === password || !foundUser.password)) {
-        db.setCurrentUser(foundUser);
-        showToast(`Welcome back, ${foundUser.name}!`, "success");
-        
-        const params = new URLSearchParams(window.location.search);
-        const redirect = params.get("redirect") || "dashboard.html";
-        
-        setTimeout(() => {
-          window.location.href = redirect;
-        }, 1000);
-      } else {
-        showToast("Invalid email or password. Hint: Try registering a new account!", "error");
-      }
-    });
-  }
+if (loginForm) {
 
-  // 4. Registration Submission Logic
-  const regForm = document.getElementById("register-form");
-  if (regForm) {
-    regForm.addEventListener("submit", (e) => {
-      e.preventDefault();
-      
-      const name = document.getElementById("reg-name").value.trim();
-      const email = document.getElementById("reg-email").value.trim();
-      const password = document.getElementById("reg-password").value;
-      
-      if (password.length < 8) {
-        showToast("Password must be at least 8 characters long.", "error");
-        return;
-      }
-      
-      const usersList = db.getData("ll_users");
-      if (usersList.some(u => u.email === email)) {
-        showToast("Email address already registered.", "error");
-        return;
-      }
-      
-      const newUserId = "user-" + Date.now();
-      const initials = name.split(" ").map(n => n[0]).slice(0, 2).join("").toUpperCase();
-      const randColor1 = getRandomHexColor();
-      const randColor2 = getRandomHexColor();
-      const avatarSvg = `<svg viewBox="0 0 100 100" class="avatar-svg"><defs><linearGradient id="av-${newUserId}" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="${randColor1}" /><stop offset="100%" stop-color="${randColor2}" /></linearGradient></defs><circle cx="50" cy="50" r="50" fill="url(#av-${newUserId})"/><text x="50" y="58" font-size="28" font-weight="700" fill="#FFF" text-anchor="middle">${initials}</text></svg>`;
+  loginForm.addEventListener("submit", async (e) => {
 
-      const newUser = {
-        id: newUserId,
-        name: name,
-        headline: "Member at LearnLoop | Ready to barter skills",
-        email: email,
-        password: password,
-        avatar: avatarSvg,
-        bio: "Skill exchange learner. Excited to exchange knowledge!",
-        location: "Global citizen",
-        skillsOffered: [],
-        skillsWanted: [],
-        rating: 5.0,
-        reviewsCount: 0,
-        exchangesCompleted: 0,
-        badges: ["Active Learner"],
-        availability: "Flexible Schedule"
-      };
-      
-      usersList.push(newUser);
-      db.saveData("ll_users", usersList);
-      
-      const notifs = db.getData("ll_notifications");
-      notifs.unshift({
-        id: "notif-" + Date.now(),
-        type: "system",
-        text: "🏆 Badge Unlocked: Active Learner! Welcome to LearnLoop.",
-        time: "Just now",
-        unread: true
+    e.preventDefault();
+
+    const email = document.getElementById("login-email").value.trim();
+    const password = document.getElementById("login-password").value;
+
+    try {
+
+      const response = await fetch("http://localhost:5009/api/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          email,
+          password
+        })
       });
-      db.saveData("ll_notifications", notifs);
-      
-      db.setCurrentUser(newUser);
-      showToast("Account created successfully! Dashboard loading...", "success");
-      
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        showToast(data.message || "Login failed", "error");
+        return;
+      }
+
+      // Save JWT
+      localStorage.setItem("token", data.token);
+
+      // Save logged in user
+      localStorage.setItem("user", JSON.stringify(data.user));
+
+      showToast("Login successful!", "success");
+
+      const params = new URLSearchParams(window.location.search);
+      const redirect = params.get("redirect") || "dashboard.html";
+
       setTimeout(() => {
-        window.location.href = "dashboard.html";
+        window.location.href = redirect;
+      }, 1000);
+
+    } catch (err) {
+
+      console.error(err);
+      showToast("Unable to connect to server.", "error");
+
+    }
+
+  });
+
+}
+
+
+// 4. Registration Submission Logic
+const regForm = document.getElementById("register-form");
+
+if (regForm) {
+
+  regForm.addEventListener("submit", async (e) => {
+
+    e.preventDefault();
+
+    const full_name = document.getElementById("reg-name").value.trim();
+    const email = document.getElementById("reg-email").value.trim();
+    const password = document.getElementById("reg-password").value;
+
+    if (password.length < 8) {
+      showToast("Password must be at least 8 characters.", "error");
+      return;
+    }
+
+    try {
+
+      const response = await fetch("http://localhost:5009/api/auth/register", {
+
+        method: "POST",
+
+        headers: {
+          "Content-Type": "application/json"
+        },
+
+        body: JSON.stringify({
+          full_name,
+          email,
+          password
+        })
+
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        showToast(data.message || "Registration failed", "error");
+        return;
+      }
+
+      showToast("Registration successful! Please login.", "success");
+
+      setTimeout(() => {
+        window.location.href = "login.html";
       }, 1200);
-    });
-  }
+
+    } catch (err) {
+
+      console.error(err);
+
+      showToast("Unable to connect to server.", "error");
+
+    }
+
+  });
+
+}
 
   // 5. Forgot Password Logic
   const forgotForm = document.getElementById("forgot-form");

@@ -1,4 +1,9 @@
 // LearnLoop Requests and Scheduling Calendar Logic
+const token = localStorage.getItem("token");
+
+if (!token) {
+    window.location.href = "login.html";
+}
 
 let currentYear = 2026;
 let currentMonth = 6;

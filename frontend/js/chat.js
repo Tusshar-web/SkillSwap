@@ -1,4 +1,11 @@
 // LearnLoop Direct Messaging Logic
+const token = localStorage.getItem("token");
+
+if (!token) {
+  window.location.href = "login.html";
+}
+
+SocketService.connectSocket(token);
 
 let activePartnerId = null;
 
@@ -26,41 +33,51 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 });
 
-function initializeConversations() {
-  const container = document.getElementById("convs-list-container");
-  if (!container) return;
+// function initializeConversations() {
+//   const container = document.getElementById("convs-list-container");
+//   if (!container) return;
 
-  const currentUser = db.getCurrentUser();
-  const requests = db.getData("ll_requests");
-  const allUsers = db.getData("ll_users");
-  const chats = db.getData("ll_chats");
+//   const currentUser = db.getCurrentUser();
+//   const requests = db.getData("ll_requests");
+//   const allUsers = db.getData("ll_users");
+//   const chats = db.getData("ll_chats");
 
-  const matchedPartners = [];
-  requests.forEach(r => {
-    if (r.status === "Accepted") {
-      const pId = r.senderId === currentUser.id ? r.receiverId : r.senderId;
-      const partnerObj = allUsers.find(u => u.id === pId);
-      if (partnerObj && !matchedPartners.some(p => p.id === partnerObj.id)) {
-        matchedPartners.push(partnerObj);
-      }
-    }
-  });
+//   const matchedPartners = [];
+//   requests.forEach(r => {
+//     if (r.status === "Accepted") {
+//       const pId = r.senderId === currentUser.id ? r.receiverId : r.senderId;
+//       const partnerObj = allUsers.find(u => u.id === pId);
+//       if (partnerObj && !matchedPartners.some(p => p.partner_id === partnerObj.id)) {
+//         matchedPartners.push(partnerObj);
+//       }
+//     }
+//   });
 
-  matchedPartners.forEach(p => {
-    if (!chats.some(c => c.partnerId === p.id)) {
-      const curFirstName = (currentUser && currentUser.name) ? currentUser.name.split(" ")[0] : "there";
-      chats.push({
-        id: "chat-" + p.id,
-        partnerId: p.id,
-        messages: [
-          { sender: p.id, text: `Hi ${curFirstName}! Ready to exchange our skills? Let me know when you'd like to talk.`, time: "Yesterday", status: "read" }
-        ]
-      });
-    }
-  });
-  db.saveData("ll_chats", chats);
+//   matchedPartners.forEach(p => {
+//     if (!chats.some(c => c.partnerId === p.partner_id)) {
+//       const curFirstName = (currentUser && currentUser.name) ? currentUser.name.split(" ")[0] : "there";
+//       chats.push({
+//         id: "chat-" + p.partner_id,
+//         partnerId: p.partner_id,
+//         messages: [
+//           { sender: p.partner_id, text: `Hi ${curFirstName}! Ready to exchange our skills? Let me know when you'd like to talk.`, time: "Yesterday", status: "read" }
+//         ]
+//       });
+//     }
+//   });
+//   db.saveData("ll_chats", chats);
 
-  renderConversationsSidebar(matchedPartners);
+//   renderConversationsSidebar(matchedPartners);
+// }
+
+async function initializeConversations() {
+  try {
+    const conversations = await ChatAPI.getConversations();
+
+    renderConversationsSidebar(conversations);
+  } catch (err) {
+    console.error(err);
+  }
 }
 
 function renderConversationsSidebar(partnersList) {
@@ -68,9 +85,13 @@ function renderConversationsSidebar(partnersList) {
   if (!container) return;
 
   const chats = db.getData("ll_chats");
-  const searchQuery = document.getElementById("chat-search").value.toLowerCase();
+  const searchQuery = document
+    .getElementById("chat-search")
+    .value.toLowerCase();
 
-  const list = partnersList.filter(p => p.name.toLowerCase().includes(searchQuery));
+  const list = partnersList.filter((p) =>
+    p.partner_name.toLowerCase().includes(searchQuery),
+  );
 
   if (list.length === 0) {
     container.innerHTML = `
@@ -82,36 +103,42 @@ function renderConversationsSidebar(partnersList) {
   }
 
   container.innerHTML = "";
-  list.forEach(p => {
-    const cRecord = chats.find(c => c.partnerId === p.id);
-    const lastMsgObj = cRecord ? cRecord.messages[cRecord.messages.length - 1] : null;
+  list.forEach((p) => {
+    const cRecord = chats.find((c) => c.partnerId === p.partner_id);
+    const lastMsgObj = cRecord
+      ? cRecord.messages[cRecord.messages.length - 1]
+      : null;
     const snippet = lastMsgObj ? lastMsgObj.text : "Click to start chatting";
     const time = lastMsgObj ? lastMsgObj.time : "";
 
-    const unreadCount = cRecord ? cRecord.messages.filter(m => m.sender === p.id && m.status === "unread").length : 0;
-    const isActive = p.id === activePartnerId ? "active" : "";
+    const unreadCount = cRecord
+      ? cRecord.messages.filter(
+          (m) => m.sender === p.partner_id && m.status === "unread",
+        ).length
+      : 0;
+    const isActive = p.partner_id === activePartnerId ? "active" : "";
 
     container.innerHTML += `
-      <div class="conv-item ${isActive}" data-id="${p.id}">
+      <div class="conv-item ${isActive}" data-id="${p.partner_id}">
         <div class="conv-avatar online">${getAvatarHTML(p)}</div>
         <div class="conv-details">
           <div class="conv-name-row">
-            <span class="conv-name">${p.name}</span>
+            <span class="conv-name">${p.partner_name}</span>
             <span class="conv-time">${time}</span>
           </div>
           <div class="conv-msg-row">
             <span class="conv-snippet">${snippet}</span>
-            ${unreadCount > 0 ? `<span class="conv-unread-dot"></span>` : ''}
+            ${unreadCount > 0 ? `<span class="conv-unread-dot"></span>` : ""}
           </div>
         </div>
       </div>
     `;
   });
 
-  document.querySelectorAll(".conv-item").forEach(item => {
+  document.querySelectorAll(".conv-item").forEach((item) => {
     item.addEventListener("click", () => {
       const partnerId = item.getAttribute("data-id");
-      selectConversation(partnerId);
+      selectConversation(p.request_id, p.partner_id, p.partner_name);
     });
   });
 
@@ -126,8 +153,8 @@ function renderConversationsSidebar(partnersList) {
 
 function selectConversation(partnerId) {
   activePartnerId = partnerId;
-  
-  document.querySelectorAll(".conv-item").forEach(item => {
+
+  document.querySelectorAll(".conv-item").forEach((item) => {
     if (item.getAttribute("data-id") === partnerId) {
       item.classList.add("active");
       const dot = item.querySelector(".conv-unread-dot");
@@ -145,16 +172,17 @@ function selectConversation(partnerId) {
   }
 
   const users = db.getData("ll_users");
-  const partner = users.find(u => u.id === partnerId);
+  const partner = users.find((u) => u.id === partnerId);
   if (!partner) return;
 
-  document.getElementById("active-partner-avatar").innerHTML = getAvatarHTML(partner);
+  document.getElementById("active-partner-avatar").innerHTML =
+    getAvatarHTML(partner);
   document.getElementById("active-partner-name").textContent = partner.name;
 
   const chats = db.getData("ll_chats");
-  const cRecord = chats.find(c => c.partnerId === partnerId);
+  const cRecord = chats.find((c) => c.partnerId === partnerId);
   if (cRecord) {
-    cRecord.messages.forEach(m => {
+    cRecord.messages.forEach((m) => {
       if (m.sender === partnerId) m.status = "read";
     });
     db.saveData("ll_chats", chats);
@@ -168,19 +196,20 @@ function renderMessagesThread() {
   if (!box || !activePartnerId) return;
 
   const chats = db.getData("ll_chats");
-  const cRecord = chats.find(c => c.partnerId === activePartnerId);
-  
+  const cRecord = chats.find((c) => c.partnerId === activePartnerId);
+
   if (!cRecord) return;
 
   box.innerHTML = "";
-  cRecord.messages.forEach(m => {
+  cRecord.messages.forEach((m) => {
     const isMe = m.sender === "current-user";
-    
+
     let receipt = "";
     if (isMe) {
-      receipt = m.status === "read" 
-        ? `<svg width="12" height="12" fill="none" class="receipt-icon" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7M5 5l7 7-7 7"/></svg>` 
-        : `<svg width="12" height="12" fill="none" stroke="var(--text-muted)" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>`;
+      receipt =
+        m.status === "read"
+          ? `<svg width="12" height="12" fill="none" class="receipt-icon" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7M5 5l7 7-7 7"/></svg>`
+          : `<svg width="12" height="12" fill="none" stroke="var(--text-muted)" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>`;
     }
 
     let textHTML = m.text;
@@ -195,7 +224,7 @@ function renderMessagesThread() {
     }
 
     box.innerHTML += `
-      <div class="message-group ${isMe ? 'me' : 'partner'}">
+      <div class="message-group ${isMe ? "me" : "partner"}">
         <div class="message-bubble">${textHTML}</div>
         <div class="message-meta">
           <span>${m.time}</span>
@@ -220,24 +249,27 @@ function setupChatInputs() {
       if (!val || !activePartnerId) return;
 
       const chats = db.getData("ll_chats");
-      let cRecord = chats.find(c => c.partnerId === activePartnerId);
-      
+      let cRecord = chats.find((c) => c.partnerId === activePartnerId);
+
       // Defensive check: create record if it does not exist
       if (!cRecord) {
         cRecord = {
           id: "chat-" + activePartnerId,
           partnerId: activePartnerId,
-          messages: []
+          messages: [],
         };
         chats.push(cRecord);
       }
 
-      const msgTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      const msgTime = new Date().toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+      });
       const newMsg = {
         sender: "current-user",
         text: val,
         time: msgTime,
-        status: "sent"
+        status: "sent",
       };
 
       cRecord.messages.push(newMsg);
@@ -245,16 +277,19 @@ function setupChatInputs() {
 
       input.value = "";
       renderMessagesThread();
-      
+
       const users = db.getData("ll_users");
       const matchedPartners = [];
       const currentUser = db.getCurrentUser();
       const currentUserId = currentUser ? currentUser.id : "";
-      db.getData("ll_requests").forEach(r => {
+      db.getData("ll_requests").forEach((r) => {
         if (r.status === "Accepted") {
           const pId = r.senderId === currentUserId ? r.receiverId : r.senderId;
-          const partnerObj = users.find(u => u.id === pId);
-          if (partnerObj && !matchedPartners.some(p => p.id === partnerObj.id)) {
+          const partnerObj = users.find((u) => u.id === pId);
+          if (
+            partnerObj &&
+            !matchedPartners.some((p) => p.partner_id === partnerObj.id)
+          ) {
             matchedPartners.push(partnerObj);
           }
         }
@@ -281,17 +316,17 @@ function triggerBotReply(partnerId, userMessageText) {
   const typingDuration = 2500;
 
   const users = db.getData("ll_users");
-  const partner = users.find(u => u.id === partnerId);
-  const pName = (partner && partner.name) ? partner.name.split(" ")[0] : "Elena";
+  const partner = users.find((u) => u.id === partnerId);
+  const pName = partner && partner.name ? partner.name.split(" ")[0] : "Elena";
 
   setTimeout(() => {
     const typingBox = document.getElementById("typing-indicator");
     const typingUser = document.getElementById("typing-username");
-    
+
     if (typingBox && activePartnerId === partnerId) {
       typingUser.textContent = pName;
       typingBox.style.display = "flex";
-      
+
       const threadBox = document.getElementById("chat-messages-box");
       if (threadBox) threadBox.scrollTop = threadBox.scrollHeight;
     }
@@ -300,58 +335,81 @@ function triggerBotReply(partnerId, userMessageText) {
       if (typingBox) typingBox.style.display = "none";
 
       const chats = db.getData("ll_chats");
-      const cRecord = chats.find(c => c.partnerId === partnerId);
+      const cRecord = chats.find((c) => c.partnerId === partnerId);
       if (!cRecord) return;
 
       let replyText = `That sounds really interesting! Let's arrange a time in the calendar to detail this out.`;
-      
+
       const textLower = userMessageText.toLowerCase();
-      if (textLower.includes("hello") || textLower.includes("hi") || textLower.includes("hey")) {
+      if (
+        textLower.includes("hello") ||
+        textLower.includes("hi") ||
+        textLower.includes("hey")
+      ) {
         replyText = `Hey there! How's your week going? Ready for our skill exchange session?`;
-      } else if (textLower.includes("time") || textLower.includes("schedule") || textLower.includes("calendar")) {
+      } else if (
+        textLower.includes("time") ||
+        textLower.includes("schedule") ||
+        textLower.includes("calendar")
+      ) {
         replyText = `Sure! Select an empty slot on the Calendar tab tomorrow and I'll confirm it right away.`;
-      } else if (textLower.includes("teach") || textLower.includes("learn") || textLower.includes("skill")) {
+      } else if (
+        textLower.includes("teach") ||
+        textLower.includes("learn") ||
+        textLower.includes("skill")
+      ) {
         replyText = `I can definitely walk you through my workflow. Can't wait to learn from your side too!`;
-      } else if (textLower.includes("file") || textLower.includes("attachment") || textLower.includes("pdf")) {
+      } else if (
+        textLower.includes("file") ||
+        textLower.includes("attachment") ||
+        textLower.includes("pdf")
+      ) {
         replyText = `Thanks for sending the resource. I'll read through it before we catch up!`;
       }
 
-      const msgTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      const msgTime = new Date().toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+      });
       cRecord.messages.push({
         sender: partnerId,
         text: replyText,
         time: msgTime,
-        status: activePartnerId === partnerId ? "read" : "unread"
+        status: activePartnerId === partnerId ? "read" : "unread",
       });
       db.saveData("ll_chats", chats);
 
       if (activePartnerId === partnerId) {
-        cRecord.messages.forEach(m => {
+        cRecord.messages.forEach((m) => {
           if (m.sender === "current-user") m.status = "read";
         });
         db.saveData("ll_chats", chats);
         renderMessagesThread();
       } else {
         const partnerNameStr = partner ? partner.name : "Partner";
-        showToast(`New message from ${partnerNameStr}: "${replyText.substring(0, 30)}..."`, "info");
+        showToast(
+          `New message from ${partnerNameStr}: "${replyText.substring(0, 30)}..."`,
+          "info",
+        );
       }
 
       const matchedPartners = [];
       const currentUser = db.getCurrentUser();
       const currentUserId = currentUser ? currentUser.id : "";
-      db.getData("ll_requests").forEach(r => {
+      db.getData("ll_requests").forEach((r) => {
         if (r.status === "Accepted") {
           const pId = r.senderId === currentUserId ? r.receiverId : r.senderId;
-          const partnerObj = users.find(u => u.id === pId);
-          if (partnerObj && !matchedPartners.some(p => p.id === partnerObj.id)) {
+          const partnerObj = users.find((u) => u.id === pId);
+          if (
+            partnerObj &&
+            !matchedPartners.some((p) => p.partner_id === partnerObj.id)
+          ) {
             matchedPartners.push(partnerObj);
           }
         }
       });
       renderConversationsSidebar(matchedPartners);
-
     }, typingDuration);
-
   }, delayStart);
 }
 
@@ -372,7 +430,7 @@ function setupEmojiDrawer() {
     drawer.classList.remove("active");
   });
 
-  drawer.querySelectorAll("span").forEach(em => {
+  drawer.querySelectorAll("span").forEach((em) => {
     em.addEventListener("click", () => {
       input.value += em.textContent;
       input.focus();
@@ -389,23 +447,33 @@ function setupAttachment() {
     if (!activePartnerId) return;
 
     const chats = db.getData("ll_chats");
-    const cRecord = chats.find(c => c.partnerId === activePartnerId);
+    const cRecord = chats.find((c) => c.partnerId === activePartnerId);
     if (!cRecord) return;
 
-    const fileNames = ["Figma_Design_System_Wireframes.pdf", "Python_Basics_StudyGuide.zip", "SkillBarter_Notes_LearnLoop.docx"];
+    const fileNames = [
+      "Figma_Design_System_Wireframes.pdf",
+      "Python_Basics_StudyGuide.zip",
+      "SkillBarter_Notes_LearnLoop.docx",
+    ];
     const randFile = fileNames[Math.floor(Math.random() * fileNames.length)];
 
-    const msgTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    const msgTime = new Date().toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
     cRecord.messages.push({
       sender: "current-user",
       text: "[FILE]" + randFile,
       time: msgTime,
-      status: "sent"
+      status: "sent",
     });
     db.saveData("ll_chats", chats);
-    
+
     renderMessagesThread();
-    showToast(`Simulated Upload: "${randFile}" shared successfully!`, "success");
+    showToast(
+      `Simulated Upload: "${randFile}" shared successfully!`,
+      "success",
+    );
 
     triggerBotReply(activePartnerId, "file shared");
   });

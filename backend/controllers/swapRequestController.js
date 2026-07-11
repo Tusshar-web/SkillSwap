@@ -7,7 +7,8 @@ const {
     getRequestById,
     acceptSwapRequest,
     rejectSwapRequest,
-    cancelSwapRequest
+    cancelSwapRequest,
+    getAcceptedConversations
 } = require("../models/swapRequestModel");
 
 const sendSwapRequest = async (req, res) => {
@@ -345,12 +346,41 @@ const cancelRequest = async (req, res) => {
 
 };
 
+
+
+const getConversations = async (req, res) => {
+
+    try {
+
+        const userId = req.user.id;
+
+        const conversations = await getAcceptedConversations(userId);
+
+        res.status(200).json({
+            success: true,
+            conversations
+        });
+
+    } catch (err) {
+
+        console.error(err);
+
+        res.status(500).json({
+            success: false,
+            message: err.message
+        });
+
+    }
+
+};
+
 module.exports = {
     sendSwapRequest,
     receivedRequests,
     sentRequests,
     acceptRequest,
     rejectRequest,
-    cancelRequest
+    cancelRequest,
+    getConversations
 
 };
