@@ -117,6 +117,12 @@ if (loginForm) {
 
       if (!response.ok) {
         showToast(data.message || "Login failed", "error");
+        if (response.status === 403) {
+          localStorage.setItem("verifyEmail", email);
+          setTimeout(() => {
+            window.location.href = "verify-email.html";
+          }, 1500);
+        }
         return;
       }
 
@@ -215,10 +221,11 @@ if (regForm) {
         return;
       }
 
-      showToast("Registration successful! Please login.", "success");
+      showToast("Registration successful! Please verify your email.", "success");
 
+      localStorage.setItem("verifyEmail", email);
       setTimeout(() => {
-        window.location.href = "login.html";
+        window.location.href = "verify-email.html";
       }, 1200);
 
     } catch (err) {

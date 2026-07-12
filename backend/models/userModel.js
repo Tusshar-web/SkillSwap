@@ -9,14 +9,33 @@ const findUserByEmail = async (email) => {
     return rows[0];
 };
 
-const createUser = async (full_name, email, password_hash) => {
+const createUser = async (
+    full_name,
+    email,
+    password_hash
+) => {
+
     const [result] = await db.execute(
-        `INSERT INTO users (full_name, email, password_hash)
-         VALUES (?, ?, ?)`,
-        [full_name, email, password_hash]
+
+        `INSERT INTO users
+        (
+            full_name,
+            email,
+            password_hash,
+            is_verified
+        )
+        VALUES (?, ?, ?, ?)`,
+        [
+            full_name,
+            email,
+            password_hash,
+            false
+        ]
+
     );
-    console.log("Insert result ", result)
+
     return result;
+
 };
 
     const getUserById = async (id) => {
@@ -81,10 +100,80 @@ const getUserProfile = async (userId) => {
     return rows[0];
 };
 
+const saveOTP = async (
+    userId,
+    otp,
+    expiry
+) => {
+
+    await db.execute(
+
+        `
+        UPDATE users
+        SET
+            verification_otp = ?,
+            otp_expiry = ?
+        WHERE id = ?
+        `,
+
+        [
+            otp,
+            expiry,
+            userId
+        ]
+
+    );
+
+};
+
+const verifyOTP = async (email, otp) => {
+
+    const [rows] = await db.execute(
+
+        `
+        SELECT *
+
+        FROM users
+
+        WHERE
+            email = ?
+            AND verification_otp = ?
+        `,
+
+        [email, otp]
+
+    );
+
+    return rows[0];
+
+};
+
+const markEmailVerified = async (userId) => {
+
+    await db.execute(
+
+        `
+        UPDATE users
+        SET
+            is_verified = true,
+            verification_otp = NULL,
+            otp_expiry = NULL
+        WHERE id = ?
+        `,
+
+        [userId]
+
+    );
+
+};
+
 module.exports = {
     findUserByEmail,
     createUser,
     getUserById,
     updateUserProfile,
-    getUserProfile
+    getUserProfile,
+    saveOTP,
+    verifyOTP,
+    markEmailVerified
 };

@@ -38,6 +38,10 @@ app.get("/test", authMiddleware, (req, res) => {
 
 });
 
+// sending email
+// const sendTestEmail = require("./utils/sendTestEmail");
+// sendTestEmail("tusshar580@gmail.com");
+
 //backend browser msg
 app.get("/", (req, res) => {
     res.send("SkillSwap Backend Running");
