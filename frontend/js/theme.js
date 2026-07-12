@@ -464,6 +464,7 @@ function setupTheme() {
   const savedTheme = localStorage.getItem("ll_theme") || "dark";
   document.documentElement.setAttribute("data-theme", savedTheme);
   renderThemeIcons();
+  setupFavicon();
 
   // Restore sidebar collapsed state
   const layout = document.querySelector(".dashboard-layout");
@@ -472,6 +473,18 @@ function setupTheme() {
     layout.classList.add("sidebar-collapsed");
     sidebar.classList.add("collapsed");
   }
+}
+
+// Inject SVG favicon dynamically
+function setupFavicon() {
+  let favicon = document.querySelector('link[rel="icon"]');
+  if (!favicon) {
+    favicon = document.createElement('link');
+    favicon.rel = 'icon';
+    favicon.type = 'image/svg+xml';
+    document.head.appendChild(favicon);
+  }
+  favicon.href = "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 44 24' fill='none'><circle cx='14' cy='12' r='8' stroke='%234F46E5' stroke-width='3.5'/><circle cx='27' cy='12' r='8' stroke='%23374151' stroke-width='3.5' stroke-opacity='0.9'/></svg>";
 }
 
 function renderThemeIcons() {
