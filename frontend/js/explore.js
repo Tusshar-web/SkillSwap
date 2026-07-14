@@ -20,6 +20,10 @@ document.addEventListener("DOMContentLoaded", () => {
   renderMatches();
   setupFilters();
   setupRequestModalEvents();
+
+  window.addEventListener("ll_users_updated", () => {
+    renderMatches();
+  });
 });
 
 function renderMatches() {

@@ -41,6 +41,12 @@ document.addEventListener("DOMContentLoaded", () => {
     openReviewModal(pendingReviewId);
     showToast("Welcome back! Please write a review for your completed session.", "info");
   }
+
+  window.addEventListener("ll_users_updated", () => {
+    renderRequests();
+    drawCalendar();
+    renderAgenda(selectedDateStr);
+  });
 });
 
 function formatDateKey(dateObj) {
@@ -531,7 +537,7 @@ function openBookingModal(defaultDateStr) {
     if (r.status === "Accepted") {
       const pId = r.senderId === currentUser.id ? r.receiverId : r.senderId;
       const partner = users.find(u => u.id === pId);
-      if (partner && !acceptedPartners.some(p => p.id === partner.id)) {
+      if (partner && partner.id !== currentUser.id && partner.backendId !== currentUser.backendId && !acceptedPartners.some(p => p.id === partner.id)) {
         acceptedPartners.push(partner);
       }
     }

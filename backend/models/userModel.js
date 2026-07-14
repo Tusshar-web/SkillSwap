@@ -29,7 +29,7 @@ const createUser = async (
             full_name,
             email,
             password_hash,
-            false
+            0
         ]
 
     );
@@ -155,7 +155,7 @@ const markEmailVerified = async (userId) => {
         `
         UPDATE users
         SET
-            is_verified = true,
+            is_verified = 1,
             verification_otp = NULL,
             otp_expiry = NULL
         WHERE id = ?

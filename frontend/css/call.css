@@ -114,6 +114,10 @@ body {
   object-fit: cover;
 }
 
+#screen-share-feed {
+  object-fit: contain !important;
+}
+
 .stage-card.hidden {
   display: none !important;
 }

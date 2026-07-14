@@ -40,6 +40,11 @@ document.addEventListener("DOMContentLoaded", () => {
   renderChatsList();
   renderBadges();
   renderSystemNotifications();
+
+  window.addEventListener("ll_users_updated", () => {
+    renderUpcomingSessions();
+    renderChatsList();
+  });
 });
 
 function drawActivityChart() {
@@ -189,9 +194,10 @@ function renderChatsList() {
   }
 
   container.innerHTML = "";
+  const currentUser = db.getCurrentUser();
   chats.forEach(c => {
     const partner = usersList.find(u => u.id === c.partnerId);
-    if (!partner) return;
+    if (!partner || (currentUser && (partner.id === currentUser.id || partner.backendId === currentUser.backendId))) return;
 
     const lastMsg = c.messages[c.messages.length - 1];
     const snippet = lastMsg ? lastMsg.text : "No messages exchange yet.";

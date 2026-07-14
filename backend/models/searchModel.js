@@ -19,6 +19,7 @@ const searchUsers = async (skill, type, currentUserId) => {
         WHERE LOWER(s.skill_name) LIKE LOWER(?)
           AND us.skill_type = ?
           AND u.id != ?
+          AND (u.is_verified = 1 OR u.is_verified IS TRUE OR u.is_verified = '1')
         ORDER BY u.full_name`,
         [
             `%${skill}%`,

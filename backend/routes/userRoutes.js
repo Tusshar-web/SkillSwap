@@ -5,13 +5,14 @@ const authMiddleware = require("../middleware/authMiddleware");
 const {
     getProfile, 
     updateProfile,
-    getMyProfile
+    getMyProfile,
+    getAllUsers
 } = require("../controllers/userController");
 
 router.get("/profile", authMiddleware, getProfile);
 router.put("/me", authMiddleware, updateProfile);
 router.get("/me", authMiddleware, getMyProfile);
-
-
+router.get("/all", getAllUsers);
+router.get("/", getAllUsers);
 
 module.exports = router;

@@ -30,118 +30,7 @@ var BADGES_LIST = [
 ];
 
 // Mock Users Database
-const MOCK_USERS = [
-  {
-    id: "user-1",
-    name: "Elena Rostova",
-    headline:
-      "Senior Product Designer & Design Systems Lead | Open to exchange",
-    avatar: `<svg viewBox="0 0 100 100" class="avatar-svg"><defs><linearGradient id="av-1" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#EC4899" /><stop offset="100%" stop-color="#8B5CF6" /></linearGradient></defs><circle cx="50" cy="50" r="50" fill="url(#av-1)"/><text x="50" y="58" font-size="28" font-weight="700" fill="#FFF" text-anchor="middle">ER</text></svg>`,
-    bio: "Product designer and design systems architect. Love crafting clean user interfaces and interactive prototypes. Looking to learn backend development.",
-    location: "Prague, Czech Republic",
-    skillsOffered: [
-      { name: "UI/UX Design", level: "Expert", endorsements: 12 },
-      { name: "Figma", level: "Expert", endorsements: 15 },
-      { name: "Interaction Design", level: "Intermediate", endorsements: 6 },
-    ],
-    skillsWanted: [
-      { name: "Node.js", level: "Beginner" },
-      { name: "Python", level: "Beginner" },
-    ],
-    rating: 4.9,
-    reviewsCount: 18,
-    exchangesCompleted: 12,
-    badges: ["Top Teacher", "Skill Master"],
-    availability: "Weekends & Evenings",
-  },
-  {
-    id: "user-2",
-    name: "Kai Tanaka",
-    headline: "Data Scientist & Python Automation Architect",
-    avatar: `<svg viewBox="0 0 100 100" class="avatar-svg"><defs><linearGradient id="av-2" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#3B82F6" /><stop offset="100%" stop-color="#06B6D4" /></linearGradient></defs><circle cx="50" cy="50" r="50" fill="url(#av-2)"/><text x="50" y="58" font-size="28" font-weight="700" fill="#FFF" text-anchor="middle">KT</text></svg>`,
-    bio: "Python developer specialized in data science, machine learning, and automation. Keen to learn creative copywriting and speaking.",
-    location: "Tokyo, Japan",
-    skillsOffered: [
-      { name: "Python", level: "Expert", endorsements: 18 },
-      { name: "Data Science", level: "Expert", endorsements: 14 },
-      { name: "SQL", level: "Intermediate", endorsements: 9 },
-    ],
-    skillsWanted: [
-      { name: "Public Speaking", level: "Beginner" },
-      { name: "Spanish", level: "Intermediate" },
-    ],
-    rating: 4.8,
-    reviewsCount: 22,
-    exchangesCompleted: 15,
-    badges: ["Top Teacher", "Knowledge Contributor"],
-    availability: "Weekdays 6 PM - 9 PM",
-  },
-  {
-    id: "user-3",
-    name: "Sarah Jenkins",
-    headline: "Keynote Speaker & Business English Coach",
-    avatar: `<svg viewBox="0 0 100 100" class="avatar-svg"><defs><linearGradient id="av-3" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#10B981" /><stop offset="100%" stop-color="#3B82F6" /></linearGradient></defs><circle cx="50" cy="50" r="50" fill="url(#av-3)"/><text x="50" y="58" font-size="28" font-weight="700" fill="#FFF" text-anchor="middle">SJ</text></svg>`,
-    bio: "Professional public speaker and communication coach. I help founders structure pitch decks and deliver clear keynotes. Eager to master HTML/CSS.",
-    location: "London, UK",
-    skillsOffered: [
-      { name: "Public Speaking", level: "Expert", endorsements: 11 },
-      { name: "Business English", level: "Expert", endorsements: 16 },
-      { name: "Communication", level: "Expert", endorsements: 13 },
-    ],
-    skillsWanted: [
-      { name: "HTML/CSS", level: "Beginner" },
-      { name: "Figma", level: "Intermediate" },
-    ],
-    rating: 5.0,
-    reviewsCount: 14,
-    exchangesCompleted: 9,
-    badges: ["Community Helper", "Top Teacher"],
-    availability: "Flexible Schedule",
-  },
-  {
-    id: "user-4",
-    name: "Devon Harris",
-    headline: "Backend Engineer | Node.js, Express & MongoDB Developer",
-    avatar: `<svg viewBox="0 0 100 100" class="avatar-svg"><defs><linearGradient id="av-4" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#F59E0B" /><stop offset="100%" stop-color="#EF4444" /></linearGradient></defs><circle cx="50" cy="50" r="50" fill="url(#av-4)"/><text x="50" y="58" font-size="28" font-weight="700" fill="#FFF" text-anchor="middle">DH</text></svg>`,
-    bio: "Full stack JavaScript developer. Specialised in Node.js, Express, MongoDB, and system architecture. Looking to pick up graphic design skills.",
-    location: "Austin, USA",
-    skillsOffered: [
-      { name: "Node.js", level: "Expert", endorsements: 22 },
-      { name: "JavaScript", level: "Expert", endorsements: 18 },
-      { name: "MongoDB", level: "Intermediate", endorsements: 11 },
-    ],
-    skillsWanted: [
-      { name: "UI/UX Design", level: "Beginner" },
-      { name: "Interaction Design", level: "Intermediate" },
-    ],
-    rating: 4.7,
-    reviewsCount: 26,
-    exchangesCompleted: 19,
-    badges: ["Skill Master", "Active Learner"],
-    availability: "Mondays & Fridays",
-  },
-  {
-    id: "user-5",
-    name: "Amara Okafor",
-    headline: "Spanish Language Tutor & Translation Specialist",
-    avatar: `<svg viewBox="0 0 100 100" class="avatar-svg"><defs><linearGradient id="av-5" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#8B5CF6" /><stop offset="100%" stop-color="#EC4899" /></linearGradient></defs><circle cx="50" cy="50" r="50" fill="url(#av-5)"/><text x="50" y="58" font-size="28" font-weight="700" fill="#FFF" text-anchor="middle">AO</text></svg>`,
-    bio: "Certified Spanish teacher and translator. Love exploring cultures and food. Want to learn Python for scripting and simple automation.",
-    location: "Barcelona, Spain",
-    skillsOffered: [
-      { name: "Spanish", level: "Expert", endorsements: 8 },
-      { name: "Language Practice", level: "Expert", endorsements: 10 },
-    ],
-    skillsWanted: [
-      { name: "Python", level: "Beginner" },
-      { name: "JavaScript", level: "Beginner" },
-    ],
-    rating: 4.9,
-    reviewsCount: 11,
-    exchangesCompleted: 8,
-    badges: ["Community Helper", "Knowledge Contributor"],
-    availability: "Weekdays Afternoon",
-  },
-];
+const MOCK_USERS = [];
 
 class LearnLoopDB {
   constructor() {
@@ -150,7 +39,7 @@ class LearnLoopDB {
 
   init() {
     if (!localStorage.getItem("ll_initialized")) {
-      localStorage.setItem("ll_users", JSON.stringify(MOCK_USERS));
+      localStorage.setItem("ll_users", JSON.stringify([]));
       localStorage.setItem(
         "ll_requests",
         JSON.stringify([
@@ -323,6 +212,32 @@ class LearnLoopDB {
     sessionStorage.removeItem("token");
     window.location.href = "login.html";
   }
+
+  async fetchActualUsers() {
+    try {
+      const res = await fetch("http://localhost:5009/api/users/all");
+      if (!res.ok) return;
+      const json = await res.json();
+      if (json && json.success && Array.isArray(json.data)) {
+        const realUsers = json.data;
+        this.saveData("ll_users", realUsers);
+
+        const current = this.getCurrentUser();
+        if (current) {
+          const myRealUser = realUsers.find(
+            (u) => u.backendId === current.backendId || u.id === current.id
+          );
+          if (myRealUser) {
+            const updatedProfile = { ...current, ...myRealUser };
+            sessionStorage.setItem("ll_current_user", JSON.stringify(updatedProfile));
+          }
+        }
+        window.dispatchEvent(new CustomEvent("ll_users_updated"));
+      }
+    } catch (err) {
+      console.error("Could not fetch actual users from backend:", err);
+    }
+  }
 }
 
 const db = new LearnLoopDB();
@@ -337,6 +252,7 @@ document.addEventListener("DOMContentLoaded", () => {
   setupDropdowns();
   setupBackToTop();
   setupMobileToggle();
+  db.fetchActualUsers();
 
   // Hide loader
   const loader = document.getElementById("loader-screen");
@@ -464,6 +380,14 @@ function setupTheme() {
   const savedTheme = localStorage.getItem("ll_theme") || "dark";
   document.documentElement.setAttribute("data-theme", savedTheme);
   renderThemeIcons();
+
+  // Restore sidebar collapsed state
+  const layout = document.querySelector(".dashboard-layout");
+  const sidebar = document.querySelector(".sidebar");
+  if (layout && sidebar && localStorage.getItem("ll_sidebar_collapsed") === "true") {
+    layout.classList.add("sidebar-collapsed");
+    sidebar.classList.add("collapsed");
+  }
 }
 
 function renderThemeIcons() {
@@ -713,58 +637,75 @@ function getGlobalNavbarHTML(activePage) {
 function getSidebarHTML(activePage) {
   const user = db.getCurrentUser();
   if (!user) return "";
-
+  const isCollapsed = localStorage.getItem("ll_sidebar_collapsed") === "true";
   return `
-    <aside class="sidebar">
-      <a href="index.html" class="sidebar-logo">
-        <svg viewBox="0 0 44 24" width="44" height="28" fill="none" style="flex-shrink:0;">
-          <circle cx="14" cy="12" r="8" stroke="var(--logo-purple)" stroke-width="3.5" />
-          <circle cx="27" cy="12" r="8" stroke="var(--logo-grey)" stroke-width="3.5" stroke-opacity="0.9" />
-        </svg>
-        <span>LearnLoop</span>
-      </a>
+    <!-- Mobile Header Bar -->
+    <div class="mobile-header-bar">
+      <button class="mobile-sidebar-toggle" id="mobile-sidebar-toggle" aria-label="Toggle Sidebar">
+        <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+      </button>
+      <div class="mobile-logo-text">LearnLoop</div>
+      <div class="mobile-avatar-wrap">${getAvatarHTML(user)}</div>
+    </div>
+    
+    <!-- Sidebar Overlay -->
+    <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+    <aside class="sidebar ${isCollapsed ? 'collapsed' : ''}">
+      <div class="sidebar-header">
+        <a href="index.html" class="sidebar-logo">
+          <svg viewBox="0 0 44 24" width="44" height="28" fill="none" style="flex-shrink:0;">
+            <circle cx="14" cy="12" r="8" stroke="var(--logo-purple)" stroke-width="3.5" />
+            <circle cx="27" cy="12" r="8" stroke="var(--logo-grey)" stroke-width="3.5" stroke-opacity="0.9" />
+          </svg>
+          <span class="logo-name">LearnLoop</span>
+        </a>
+        <button class="sidebar-collapse-btn" id="desktop-sidebar-collapse-btn" aria-label="Collapse Sidebar">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+        </button>
+      </div>
       <ul class="sidebar-menu">
         <li class="sidebar-item ${activePage === "dashboard" ? "active" : ""}">
           <a href="dashboard.html">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>
-            Dashboard
+            <span>Dashboard</span>
           </a>
         </li>
         <li class="sidebar-item ${activePage === "feed" ? "active" : ""}">
           <a href="feed.html">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-            Community Feed
+            <span>Community Feed</span>
           </a>
         </li>
         <li class="sidebar-item ${activePage === "explore" ? "active" : ""}">
           <a href="explore.html">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-            Find Partners
+            <span>Find Partners</span>
           </a>
         </li>
         <li class="sidebar-item ${activePage === "requests" ? "active" : ""}">
           <a href="requests.html">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-            Requests & Calendar
+            <span>Requests & Calendar</span>
           </a>
         </li>
         <li class="sidebar-item ${activePage === "chat" ? "active" : ""}">
           <a href="chat.html">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
-            Messaging
+            <span>Messaging</span>
           </a>
         </li>
         <li class="sidebar-item ${activePage === "profile" ? "active" : ""}">
           <a href="profile.html">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
-            My Profile
+            <span>My Profile</span>
           </a>
         </li>
       </ul>
       <div class="sidebar-footer" style="display:flex; align-items:center; justify-content:space-between; width:100%; gap:8px;">
         <a href="profile.html" class="sidebar-user" style="display:flex; align-items:center; gap:12px; text-decoration:none; flex-grow:1; min-width:0;">
           <div class="sidebar-user-avatar" style="flex-shrink:0;">${getAvatarHTML(user)}</div>
-          <div class="sidebar-user-info" style="display:flex; flex-direction:column; overflow:hidden;">
+          <div class="sidebar-user-info user-details" style="display:flex; flex-direction:column; overflow:hidden;">
             <span class="sidebar-user-name" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; font-weight:600; color:var(--text-primary); font-size:13.5px;">${user.name}</span>
             <span class="sidebar-user-role" style="font-size:11.5px; color:var(--text-muted);">View Profile</span>
           </div>
@@ -790,11 +731,42 @@ function forceAuth() {
   if (!user) {
     window.location.href =
       "login.html?redirect=" + encodeURIComponent(window.location.pathname);
+  } else {
+    db.fetchActualUsers();
   }
 }
 
 document.addEventListener("click", (e) => {
   if (e.target.closest(".logout-btn")) {
     db.logout();
+  }
+
+  // Collapse sidebar toggle click
+  const collapseBtn = e.target.closest("#desktop-sidebar-collapse-btn");
+  if (collapseBtn) {
+    const layout = document.querySelector(".dashboard-layout");
+    const sidebar = document.querySelector(".sidebar");
+    if (layout && sidebar) {
+      const isCollapsed = layout.classList.toggle("sidebar-collapsed");
+      sidebar.classList.toggle("collapsed");
+      localStorage.setItem("ll_sidebar_collapsed", isCollapsed ? "true" : "false");
+    }
+  }
+
+  // Mobile sidebar toggle click
+  const mobileToggleBtn = e.target.closest("#mobile-sidebar-toggle");
+  if (mobileToggleBtn) {
+    const sidebar = document.querySelector(".sidebar");
+    const overlay = document.querySelector("#sidebar-overlay");
+    if (sidebar) sidebar.classList.toggle("active");
+    if (overlay) overlay.classList.toggle("active");
+  }
+
+  // Close sidebar when clicking overlay
+  if (e.target.closest("#sidebar-overlay")) {
+    const sidebar = document.querySelector(".sidebar");
+    const overlay = document.querySelector("#sidebar-overlay");
+    if (sidebar) sidebar.classList.remove("active");
+    if (overlay) overlay.classList.remove("active");
   }
 });
