@@ -110,7 +110,7 @@ const getAllUsers = async (req, res) => {
     );
 
     const [allSkills] = await db.execute(
-      `SELECT us.user_id, us.proficiency, us.description, us.skill_type, s.skill_name
+      `SELECT us.user_skill_id, us.user_id, us.proficiency, us.description, us.skill_type, s.skill_name
        FROM user_skills us
        JOIN skills s ON us.skill_id = s.skill_id`
     );
@@ -120,15 +120,19 @@ const getAllUsers = async (req, res) => {
       const offered = userSkills
         .filter((s) => s.skill_type === "offer" || s.skill_type === "OFFER" || s.skill_type === "Offer")
         .map((s) => ({
+          userSkillId: s.user_skill_id,
           name: s.skill_name,
           level: s.proficiency || "Intermediate",
           endorsements: Math.floor(Math.random() * 12) + 3,
+          description: s.description || "",
         }));
       const wanted = userSkills
         .filter((s) => s.skill_type === "want" || s.skill_type === "WANT" || s.skill_type === "Want")
         .map((s) => ({
+          userSkillId: s.user_skill_id,
           name: s.skill_name,
           level: s.proficiency || "Beginner",
+          description: s.description || "",
         }));
 
       const initials = (u.full_name || "User")

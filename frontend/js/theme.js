@@ -234,8 +234,49 @@ class LearnLoopDB {
         }
         window.dispatchEvent(new CustomEvent("ll_users_updated"));
       }
+      await this.syncMySkills();
     } catch (err) {
       console.error("Could not fetch actual users from backend:", err);
+    }
+  }
+
+  async syncMySkills() {
+    const token = sessionStorage.getItem("token");
+    if (!token) return;
+    try {
+      const res = await fetch("http://localhost:5009/api/skills/me", {
+        headers: { "Authorization": `Bearer ${token}` }
+      });
+      if (!res.ok) return;
+      const json = await res.json();
+      if (json && json.success && Array.isArray(json.skills)) {
+        const current = this.getCurrentUser();
+        if (!current) return;
+        const offered = json.skills
+          .filter(s => s.skill_type === "offer" || s.skill_type === "OFFER" || s.skill_type === "Offer")
+          .map((s, idx) => ({
+            userSkillId: s.user_skill_id,
+            name: s.skill_name,
+            level: s.proficiency || "Intermediate",
+            endorsements: 5 + (idx * 2),
+            description: s.description || ""
+          }));
+        const wanted = json.skills
+          .filter(s => s.skill_type === "want" || s.skill_type === "WANT" || s.skill_type === "Want")
+          .map((s, idx) => ({
+            userSkillId: s.user_skill_id,
+            name: s.skill_name,
+            level: s.proficiency || "Beginner",
+            endorsements: 2,
+            description: s.description || ""
+          }));
+        current.skillsOffered = offered;
+        current.skillsWanted = wanted;
+        this.setCurrentUser(current);
+        window.dispatchEvent(new CustomEvent("ll_skills_updated"));
+      }
+    } catch (err) {
+      console.error("Could not sync my skills from backend:", err);
     }
   }
 }
