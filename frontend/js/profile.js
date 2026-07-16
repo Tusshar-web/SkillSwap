@@ -37,6 +37,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // 7. Wire skill modals
   setupSkillModalEvents();
+
+  window.addEventListener("ll_skills_updated", () => {
+    renderSkills();
+    renderProfileBadges();
+  });
+  window.addEventListener("ll_users_updated", () => {
+    renderSkills();
+  });
 });
 
 // Render basic profile information
@@ -276,7 +284,36 @@ function setupSkillModalEvents() {
   closeBtn.addEventListener("click", closeModal);
   cancelBtn.addEventListener("click", closeModal);
 
-  form.addEventListener("submit", (e) => {
+  // Wire live autocomplete search for skill name input
+  const skillNameInput = document.getElementById("skill-name-input");
+  const datalist = document.getElementById("skills-datalist");
+  if (skillNameInput && datalist) {
+    let debounceTimer;
+    skillNameInput.addEventListener("input", (e) => {
+      clearTimeout(debounceTimer);
+      const val = e.target.value.trim();
+      debounceTimer = setTimeout(async () => {
+        try {
+          const url = val 
+            ? `http://localhost:5009/api/skills/search?q=${encodeURIComponent(val)}`
+            : `http://localhost:5009/api/skills/`;
+          const res = await fetch(url);
+          if (res.ok) {
+            const data = await res.json();
+            if (data && data.success && Array.isArray(data.skills)) {
+              datalist.innerHTML = data.skills
+                .map(s => `<option value="${s.skill_name}">`)
+                .join("");
+            }
+          }
+        } catch (err) {
+          console.error("Autocomplete search error:", err);
+        }
+      }, 250);
+    });
+  }
+
+  form.addEventListener("submit", async (e) => {
     e.preventDefault();
     const type = document.getElementById("skill-type").value;
     const editIdx = parseInt(document.getElementById("skill-edit-index").value);
@@ -284,31 +321,90 @@ function setupSkillModalEvents() {
     const skillName = document.getElementById("skill-name-input").value.trim();
     const skillLevel = document.getElementById("skill-level-input").value;
     
-    const user = db.getCurrentUser();
+    const token = sessionStorage.getItem("token");
+    const user = db.getCurrentUser() || {};
     if (!user.skillsOffered) user.skillsOffered = [];
     if (!user.skillsWanted) user.skillsWanted = [];
     if (!user.badges) user.badges = [];
 
     const targetArr = type === "offered" ? user.skillsOffered : user.skillsWanted;
     const existingEndorsements = (editIdx !== -1 && targetArr[editIdx]) ? targetArr[editIdx].endorsements : 3;
-    const newSkill = { name: skillName, level: skillLevel, endorsements: existingEndorsements };
 
     if (editIdx === -1) {
       if (targetArr.some(s => s.name.toLowerCase() === skillName.toLowerCase())) {
         showToast("Skill is already listed in this category.", "error");
         return;
       }
-      targetArr.push(newSkill);
+      if (token) {
+        try {
+          const res = await fetch("http://localhost:5009/api/skills/", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${token}`
+            },
+            body: JSON.stringify({
+              skill_name: skillName,
+              skill_type: type === "offered" ? "offer" : "want",
+              proficiency: skillLevel,
+              description: ""
+            })
+          });
+          const data = await res.json();
+          if (!res.ok || !data.success) {
+            showToast(data.message || "Skill already exists or failed to add via API", "error");
+            return;
+          }
+          await db.syncMySkills();
+          await db.fetchActualUsers();
+          closeModal();
+          showToast(data.message || `Added ${skillName} to your list!`, "success");
+          return;
+        } catch (err) {
+          console.error("API error adding skill:", err);
+        }
+      }
+      targetArr.push({ name: skillName, level: skillLevel, endorsements: existingEndorsements });
       showToast(`Added ${skillName} to your list!`, "success");
     } else {
-      targetArr[editIdx] = newSkill;
+      if (token && targetArr[editIdx] && targetArr[editIdx].userSkillId) {
+        try {
+          const res = await fetch(`http://localhost:5009/api/skills/${targetArr[editIdx].userSkillId}`, {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${token}`
+            },
+            body: JSON.stringify({
+              skill_type: type === "offered" ? "offer" : "want",
+              proficiency: skillLevel,
+              description: targetArr[editIdx].description || ""
+            })
+          });
+          const data = await res.json();
+          if (!res.ok || !data.success) {
+            showToast(data.message || "Failed to update skill via API", "error");
+            return;
+          }
+          await db.syncMySkills();
+          await db.fetchActualUsers();
+          closeModal();
+          showToast(data.message || `Updated ${skillName}!`, "success");
+          return;
+        } catch (err) {
+          console.error("API error updating skill:", err);
+        }
+      }
+      targetArr[editIdx] = { ...targetArr[editIdx], name: skillName, level: skillLevel, endorsements: existingEndorsements };
       showToast(`Updated ${skillName}!`, "success");
     }
 
     if (type === "offered" && user.skillsOffered.filter(s => s.level === "Expert").length >= 3) {
       if (!user.badges.includes("Skill Master")) {
         user.badges.push("Skill Master");
-        triggerBadgeUnlockNotif("Skill Master");
+        if (typeof triggerBadgeUnlockNotif === "function") {
+          triggerBadgeUnlockNotif("Skill Master");
+        }
       }
     }
 
@@ -349,11 +445,37 @@ function openSkillModal(type, index, skillObj = null) {
   modal.classList.add("active");
 }
 
-function deleteSkill(type, index) {
+async function deleteSkill(type, index) {
   const user = db.getCurrentUser();
   const targetArr = type === "offered" ? user.skillsOffered : user.skillsWanted;
-  const removed = targetArr.splice(index, 1)[0];
+  if (!targetArr || !targetArr[index]) return;
+  const removed = targetArr[index];
+  const token = sessionStorage.getItem("token");
 
+  if (token && removed.userSkillId) {
+    try {
+      const res = await fetch(`http://localhost:5009/api/skills/${removed.userSkillId}`, {
+        method: "DELETE",
+        headers: {
+          "Authorization": `Bearer ${token}`
+        }
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        showToast(data.message || "Failed to delete skill via API", "error");
+        return;
+      }
+      await db.syncMySkills();
+      await db.fetchActualUsers();
+      renderSkills();
+      showToast(data.message || `Removed skill: ${removed.name}`, "info");
+      return;
+    } catch (err) {
+      console.error("API error deleting skill:", err);
+    }
+  }
+
+  targetArr.splice(index, 1);
   db.setCurrentUser(user);
   const masterList = db.getData("ll_users");
   const uIdx = masterList.findIndex(u => u.id === user.id);
