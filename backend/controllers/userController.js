@@ -2,6 +2,7 @@ const {
   getUserById,
   updateUserProfile,
   getUserProfile,
+  getUserOfferSkills
 } = require("../models/userModel");
 
 const getProfile = async (req, res) => {
@@ -175,9 +176,36 @@ const getAllUsers = async (req, res) => {
   }
 };
 
+const getOfferSkills = async (req, res) => {
+
+    try {
+
+        const userId = req.params.userId;
+
+        const skills = await getUserOfferSkills(userId);
+
+        res.json({
+            success: true,
+            skills
+        });
+
+    } catch (err) {
+
+        console.error(err);
+
+        res.status(500).json({
+            success: false,
+            message: err.message
+        });
+
+    }
+
+};
+
 module.exports = {
   getProfile,
   updateProfile,
   getMyProfile,
   getAllUsers,
+  getOfferSkills
 };

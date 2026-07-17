@@ -235,13 +235,14 @@ class LearnLoopDB {
         window.dispatchEvent(new CustomEvent("ll_users_updated"));
       }
       await this.syncMySkills();
+      await this.syncExchangeRequests();
     } catch (err) {
       console.error("Could not fetch actual users from backend:", err);
     }
   }
 
   async syncMySkills() {
-    const token = sessionStorage.getItem("token");
+    const token = sessionStorage.getItem("token") || localStorage.getItem("token");
     if (!token) return;
     try {
       const res = await fetch("http://localhost:5009/api/skills/me", {
@@ -277,6 +278,65 @@ class LearnLoopDB {
       }
     } catch (err) {
       console.error("Could not sync my skills from backend:", err);
+    }
+  }
+
+  async syncExchangeRequests() {
+    const token = sessionStorage.getItem("token") || localStorage.getItem("token");
+    if (!token) return;
+    try {
+      const [inRes, outRes] = await Promise.all([
+        fetch("http://localhost:5009/api/exchange-requests/incoming", {
+          headers: { "Authorization": `Bearer ${token}` }
+        }),
+        fetch("http://localhost:5009/api/exchange-requests/outgoing", {
+          headers: { "Authorization": `Bearer ${token}` }
+        })
+      ]);
+
+      if (!inRes.ok || !outRes.ok) return;
+
+      const inJson = await inRes.json();
+      const outJson = await outRes.json();
+
+      if (inJson.success && outJson.success && Array.isArray(inJson.requests) && Array.isArray(outJson.requests)) {
+        const formattedIncoming = inJson.requests.map(er => ({
+          id: "er-" + er.request_id,
+          backendId: er.request_id,
+          senderId: "user-" + er.sender_id,
+          receiverId: "user-" + er.receiver_id,
+          skillOffered: er.sender_skill || "Offered Skill",
+          skillWanted: er.receiver_skill || "Requested Skill",
+          senderSkillId: er.sender_user_skill_id,
+          receiverSkillId: er.receiver_user_skill_id,
+          proposalMessage: er.message || "",
+          status: er.status ? (er.status.charAt(0).toUpperCase() + er.status.slice(1).toLowerCase()) : "Pending",
+          timestamp: er.created_at || new Date().toISOString()
+        }));
+
+        const formattedOutgoing = outJson.requests.map(er => ({
+          id: "er-" + er.request_id,
+          backendId: er.request_id,
+          senderId: "user-" + er.sender_id,
+          receiverId: "user-" + er.receiver_id,
+          skillOffered: er.sender_skill || "Offered Skill",
+          skillWanted: er.receiver_skill || "Requested Skill",
+          senderSkillId: er.sender_user_skill_id,
+          receiverSkillId: er.receiver_user_skill_id,
+          proposalMessage: er.message || "",
+          status: er.status ? (er.status.charAt(0).toUpperCase() + er.status.slice(1).toLowerCase()) : "Pending",
+          timestamp: er.created_at || new Date().toISOString()
+        }));
+
+        const existing = this.getData("ll_requests") || [];
+        const localOnly = existing.filter(r => r && r.id && r.id.startsWith("req-"));
+        const combined = [...formattedIncoming, ...formattedOutgoing, ...localOnly];
+
+        this.saveData("ll_requests", combined);
+        window.dispatchEvent(new CustomEvent("ll_requests_updated"));
+      }
+    } catch (err) {
+      console.error("Could not sync exchange requests from backend:", err);
     }
   }
 }

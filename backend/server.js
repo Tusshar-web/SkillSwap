@@ -26,7 +26,8 @@ const swapRequestRoutes = require("./routes/swapRequestRoutes");
 app.use("/api/swap", swapRequestRoutes);
 const chatRoutes = require("./routes/chatRoutes");
 app.use("/api/chat", chatRoutes);
-
+const exchangeRequestRoutes = require("./routes/exchangeRequestRoutes");
+app.use("/api/exchange-requests", exchangeRequestRoutes);
 // Protected Route
 const authMiddleware = require("./middleware/authMiddleware");
 app.get("/test", authMiddleware, (req, res) => {

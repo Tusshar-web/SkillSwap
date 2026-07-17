@@ -167,6 +167,29 @@ const markEmailVerified = async (userId) => {
 
 };
 
+const getUserOfferSkills = async (userId) => {
+
+    const [rows] = await db.execute(
+        `
+        SELECT
+            us.user_skill_id,
+            s.skill_name,
+            us.proficiency,
+            us.description
+        FROM user_skills us
+        JOIN skills s
+            ON us.skill_id = s.skill_id
+        WHERE
+            us.user_id = ?
+        AND us.skill_type = 'offer'
+        ORDER BY s.skill_name
+        `,
+        [userId]
+    );
+
+    return rows;
+};
+
 module.exports = {
     findUserByEmail,
     createUser,
@@ -175,5 +198,6 @@ module.exports = {
     getUserProfile,
     saveOTP,
     verifyOTP,
-    markEmailVerified
+    markEmailVerified,
+    getUserOfferSkills
 };

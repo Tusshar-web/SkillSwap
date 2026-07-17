@@ -40,10 +40,19 @@ document.addEventListener("DOMContentLoaded", () => {
   renderChatsList();
   renderBadges();
   renderSystemNotifications();
+  db.syncExchangeRequests();
 
   window.addEventListener("ll_users_updated", () => {
     renderUpcomingSessions();
     renderChatsList();
+  });
+  window.addEventListener("ll_requests_updated", () => {
+    const usr = db.getCurrentUser();
+    if (!usr) return;
+    const reqs = db.getData("ll_requests");
+    const active = reqs.filter(r => (r.senderId === usr.id || r.receiverId === usr.id) && r.status === "Pending").length;
+    const el = document.getElementById("stat-requests");
+    if (el) el.textContent = active;
   });
 });
 

@@ -148,6 +148,7 @@ const getSkillById = async (userSkillId) => {
         `
         SELECT
             us.user_skill_id,
+            us.user_id,
             s.skill_name,
             us.skill_type,
             us.proficiency,

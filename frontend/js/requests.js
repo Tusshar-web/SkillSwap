@@ -42,7 +42,14 @@ document.addEventListener("DOMContentLoaded", () => {
     showToast("Welcome back! Please write a review for your completed session.", "info");
   }
 
+  db.syncExchangeRequests();
+
   window.addEventListener("ll_users_updated", () => {
+    renderRequests();
+    drawCalendar();
+    renderAgenda(selectedDateStr);
+  });
+  window.addEventListener("ll_requests_updated", () => {
     renderRequests();
     drawCalendar();
     renderAgenda(selectedDateStr);
@@ -227,10 +234,29 @@ function renderRequests() {
   }
 }
 
-function acceptRequest(reqId) {
+async function acceptRequest(reqId) {
   const requests = db.getData("ll_requests");
   const req = requests.find(r => r.id === reqId);
   if (!req) return;
+
+  const token = sessionStorage.getItem("token") || localStorage.getItem("token");
+  const backendId = req.backendId || (req.id && req.id.startsWith("er-") ? req.id.replace("er-", "") : null);
+
+  if (token && backendId) {
+    try {
+      const res = await fetch(`http://localhost:5009/api/exchange-requests/${backendId}/accept`, {
+        method: "PUT",
+        headers: { "Authorization": `Bearer ${token}` }
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        showToast(data.message || "Failed to accept request on backend.", "error");
+        return;
+      }
+    } catch (err) {
+      console.error("Error accepting request on backend:", err);
+    }
+  }
 
   req.status = "Accepted";
   db.saveData("ll_requests", requests);
@@ -280,31 +306,82 @@ function acceptRequest(reqId) {
   }
 
   showToast(`Accepted proposal from ${pName}! Chat room and calendar session created.`, "success");
-  renderRequests();
-  drawCalendar();
-  renderAgenda(selectedDateStr);
+  if (token && backendId) {
+    await db.syncExchangeRequests();
+  } else {
+    renderRequests();
+    drawCalendar();
+    renderAgenda(selectedDateStr);
+  }
 }
 
-function rejectRequest(reqId) {
+async function rejectRequest(reqId) {
   const requests = db.getData("ll_requests");
   const req = requests.find(r => r.id === reqId);
   if (!req) return;
+
+  const token = sessionStorage.getItem("token") || localStorage.getItem("token");
+  const backendId = req.backendId || (req.id && req.id.startsWith("er-") ? req.id.replace("er-", "") : null);
+
+  if (token && backendId) {
+    try {
+      const res = await fetch(`http://localhost:5009/api/exchange-requests/${backendId}/reject`, {
+        method: "PUT",
+        headers: { "Authorization": `Bearer ${token}` }
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        showToast(data.message || "Failed to reject request on backend.", "error");
+        return;
+      }
+    } catch (err) {
+      console.error("Error rejecting request on backend:", err);
+    }
+  }
 
   req.status = "Rejected";
   db.saveData("ll_requests", requests);
 
   showToast("Declined proposal.", "info");
-  renderRequests();
+  if (token && backendId) {
+    await db.syncExchangeRequests();
+  } else {
+    renderRequests();
+  }
 }
 
-function cancelRequest(reqId) {
+async function cancelRequest(reqId) {
   const requests = db.getData("ll_requests");
+  const req = requests.find(r => r.id === reqId);
   const idx = requests.findIndex(r => r.id === reqId);
   if (idx !== -1) {
+    const token = sessionStorage.getItem("token") || localStorage.getItem("token");
+    const backendId = req?.backendId || (req?.id && req.id.startsWith("er-") ? req.id.replace("er-", "") : null);
+
+    if (token && backendId) {
+      try {
+        const res = await fetch(`http://localhost:5009/api/exchange-requests/${backendId}`, {
+          method: "DELETE",
+          headers: { "Authorization": `Bearer ${token}` }
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          showToast(data.message || "Failed to cancel request on backend.", "error");
+          return;
+        }
+      } catch (err) {
+        console.error("Error cancelling request on backend:", err);
+      }
+    }
+
     requests.splice(idx, 1);
     db.saveData("ll_requests", requests);
     showToast("Proposal cancelled successfully.", "info");
-    renderRequests();
+    if (token && backendId) {
+      await db.syncExchangeRequests();
+    } else {
+      renderRequests();
+    }
   }
 }
 

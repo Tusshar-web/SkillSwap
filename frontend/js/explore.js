@@ -20,8 +20,12 @@ document.addEventListener("DOMContentLoaded", () => {
   renderMatches();
   setupFilters();
   setupRequestModalEvents();
+  db.syncExchangeRequests();
 
   window.addEventListener("ll_users_updated", () => {
+    renderMatches();
+  });
+  window.addEventListener("ll_requests_updated", () => {
     renderMatches();
   });
 });
@@ -245,11 +249,15 @@ function setupRequestModalEvents() {
   closeBtn.addEventListener("click", closeModal);
   cancelBtn.addEventListener("click", closeModal);
 
-  form.addEventListener("submit", (e) => {
+  form.addEventListener("submit", async (e) => {
     e.preventDefault();
     const partnerId = document.getElementById("target-partner-id").value;
-    const offerSkill = document.getElementById("barter-offer-select").value;
-    const receiveSkill = document.getElementById("barter-receive-select").value;
+    const offerSelect = document.getElementById("barter-offer-select");
+    const receiveSelect = document.getElementById("barter-receive-select");
+    const offerSkill = offerSelect.value;
+    const receiveSkill = receiveSelect.value;
+    const offerSkillId = offerSelect.selectedOptions[0]?.getAttribute("data-skill-id");
+    const receiveSkillId = receiveSelect.selectedOptions[0]?.getAttribute("data-skill-id");
     const proposalMsg = document.getElementById("exchange-proposal-msg").value.trim();
 
     const currentUser = db.getCurrentUser();
@@ -257,20 +265,60 @@ function setupRequestModalEvents() {
     const partner = allUsers.find(u => u.id === partnerId);
     if (!partner) return;
 
-    const requests = db.getData("ll_requests");
-    const newRequest = {
-      id: "req-" + Date.now(),
-      senderId: currentUser.id,
-      receiverId: partner.id,
-      skillOffered: offerSkill,
-      skillWanted: receiveSkill,
-      proposalMessage: proposalMsg,
-      status: "Pending",
-      timestamp: new Date().toISOString()
-    };
+    const token = sessionStorage.getItem("token") || localStorage.getItem("token");
+    const targetBackendId = partner.backendId || (partnerId && partnerId.startsWith("user-") ? partnerId.replace("user-", "") : null);
+    let apiSuccess = false;
 
-    requests.push(newRequest);
-    db.saveData("ll_requests", requests);
+    if (token && offerSkillId && receiveSkillId && targetBackendId && !isNaN(Number(targetBackendId))) {
+      try {
+        const response = await fetch("http://localhost:5009/api/exchange-requests", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            receiver_id: Number(targetBackendId),
+            sender_user_skill_id: Number(offerSkillId),
+            receiver_user_skill_id: Number(receiveSkillId),
+            message: proposalMsg
+          })
+        });
+        const data = await response.json();
+        if (response.ok && data.success) {
+          apiSuccess = true;
+          await db.syncExchangeRequests();
+        } else {
+          console.warn("Backend exchange request creation warning:", data.message);
+          if (response.status === 400 || response.status === 403 || response.status === 409) {
+            showToast(data.message || "Failed to send proposal.", "error");
+            return;
+          }
+        }
+      } catch (err) {
+        console.error("Error creating exchange request via API:", err);
+      }
+    }
+
+    if (!apiSuccess) {
+      const requests = db.getData("ll_requests");
+      const newRequest = {
+        id: "req-" + Date.now(),
+        senderId: currentUser.id,
+        receiverId: partner.id,
+        skillOffered: offerSkill,
+        skillWanted: receiveSkill,
+        senderSkillId: offerSkillId || null,
+        receiverSkillId: receiveSkillId || null,
+        proposalMessage: proposalMsg,
+        status: "Pending",
+        timestamp: new Date().toISOString()
+      };
+
+      requests.push(newRequest);
+      db.saveData("ll_requests", requests);
+      triggerSimulatedAcceptance(newRequest.id, partner.name);
+    }
 
     const notifs = db.getData("ll_notifications");
     notifs.unshift({
@@ -285,8 +333,6 @@ function setupRequestModalEvents() {
     closeModal();
     renderMatches();
     showToast(`Proposal sent to ${partner.name}!`, "success");
-
-    triggerSimulatedAcceptance(newRequest.id, partner.name);
   });
 }
 
@@ -309,7 +355,7 @@ function openExchangeModal(partnerId) {
     offerSelect.innerHTML = `<option value="">Fill profile offered skills first</option>`;
   } else {
     currentUser.skillsOffered.forEach(s => {
-      offerSelect.innerHTML += `<option value="${s.name}">${s.name} (${s.level})</option>`;
+      offerSelect.innerHTML += `<option value="${s.name}" data-skill-id="${s.userSkillId || ''}">${s.name} (${s.level})</option>`;
     });
   }
 
@@ -318,7 +364,7 @@ function openExchangeModal(partnerId) {
     receiveSelect.innerHTML = `<option value="">No skills listed</option>`;
   } else {
     partner.skillsOffered.forEach(s => {
-      receiveSelect.innerHTML += `<option value="${s.name}">${s.name} (${s.level})</option>`;
+      receiveSelect.innerHTML += `<option value="${s.name}" data-skill-id="${s.userSkillId || ''}">${s.name} (${s.level})</option>`;
     });
   }
 
