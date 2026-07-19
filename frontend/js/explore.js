@@ -1,4 +1,4 @@
-// LearnLoop Explore & Matching Logic
+// Learnova Explore & Matching Logic
 const token = localStorage.getItem("token");
 
 if (!token) {

@@ -1,4 +1,4 @@
-// LearnLoop Landing Page Actions
+// Learnova Landing Page Actions
 
 document.addEventListener("DOMContentLoaded", () => {
   // 1. Inject global navbar

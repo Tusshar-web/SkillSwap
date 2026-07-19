@@ -1,4 +1,4 @@
-// LearnLoop Dashboard Logic
+// Learnova Dashboard Logic
 const token = sessionStorage.getItem("token");
 
 if (!token) {

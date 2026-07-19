@@ -1,4 +1,4 @@
-// LearnLoop Secure Meeting Room - Google Meet & Zoom Controller Logic
+// Learnova Secure Meeting Room - Google Meet & Zoom Controller Logic
 const token = localStorage.getItem("token");
 
 if (!token) {

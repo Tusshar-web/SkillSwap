@@ -1,4 +1,4 @@
-// LearnLoop Profile & Skill Management Logic
+// Learnova Profile & Skill Management Logic
 const token = sessionStorage.getItem("token");
 
 if (!token) {
@@ -72,7 +72,7 @@ function renderProfileInfo() {
   document.getElementById("profile-display-name").textContent = user.name;
   
   // Professional Headline
-  const hlText = user.headline || `Skill Exchange Partner | Active Member at LearnLoop`;
+  const hlText = user.headline || `Skill Exchange Partner | Active Member at Learnova`;
   document.getElementById("profile-display-headline").textContent = hlText;
 
   document.getElementById("profile-display-location").innerHTML = `
@@ -499,10 +499,10 @@ function renderExperienceTimeline() {
   if (completed.length === 0) {
     container.innerHTML = `
       <div class="experience-item">
-        <div class="exp-logo">LL</div>
+        <div class="exp-logo">LN</div>
         <div class="exp-details">
           <h4>Founder Member & Exchange Starter</h4>
-          <h5>LearnLoop Barter Network</h5>
+          <h5>Learnova Barter Network</h5>
           <p>July 2026 - Present</p>
           <p class="exp-desc">Ready to launch my first skill swap! Connect with me on the explore page to barter programming, language practice, or creative topics.</p>
         </div>
@@ -515,10 +515,10 @@ function renderExperienceTimeline() {
   completed.forEach(s => {
     container.innerHTML += `
       <div class="experience-item">
-        <div class="exp-logo">LL</div>
+        <div class="exp-logo">LN</div>
         <div class="exp-details">
           <h4>Skill Barter Exchange Partner</h4>
-          <h5>LearnLoop Barter Network &bull; Complete Swap</h5>
+          <h5>Learnova Barter Network &bull; Complete Swap</h5>
           <p>Date: ${s.date} &bull; ${s.time}</p>
           <p class="exp-desc">Exchanged knowledge with <strong>${s.partnerName}</strong>. Covered topic session: <em>"${s.topic}"</em>. Earned recommendation rating points.</p>
         </div>

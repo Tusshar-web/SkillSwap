@@ -1,5 +1,5 @@
 
-// LearnLoop Authentication Logic
+// Learnova Authentication Logic
 
 document.addEventListener("DOMContentLoaded", () => {
   // 1. Toggle Login and Forgot Password views in login.html
@@ -139,7 +139,7 @@ if (!localProfile || localProfile.backendId !== data.user.id) {
   localProfile = {
     id: "user-" + data.user.id,
     name: data.user.full_name,
-    headline: "Member at LearnLoop | Ready to barter skills",
+    headline: "Member at Learnova | Ready to barter skills",
     bio: "",
     location: "Global citizen",
     avatar: `<svg viewBox="0 0 100 100" class="avatar-svg"><defs><linearGradient id="av-${data.user.id}" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#4F46E5" /><stop offset="100%" stop-color="#7C3AED" /></linearGradient></defs><circle cx="50" cy="50" r="50" fill="url(#av-${data.user.id})"/><text x="50" y="58" font-size="28" font-weight="700" fill="#FFF" text-anchor="middle">${initials}</text></svg>`,

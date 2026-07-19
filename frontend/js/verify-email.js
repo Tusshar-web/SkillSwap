@@ -1,4 +1,4 @@
-// LearnLoop Email Verification Logic
+// Learnova Email Verification Logic
 
 document.addEventListener("DOMContentLoaded", () => {
   const emailText = document.getElementById("email-text");

@@ -1,4 +1,4 @@
-// LearnLoop Requests and Scheduling Calendar Logic
+// Learnova Requests and Scheduling Calendar Logic
 const token = localStorage.getItem("token");
 
 if (!token) {

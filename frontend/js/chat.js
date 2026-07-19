@@ -1,6 +1,6 @@
 let activePartnerId = null;
 let activeRequestId = null;
-// LearnLoop Direct Messaging Logic
+// Learnova Direct Messaging Logic
 const token = sessionStorage.getItem("token");
 
 if (!token) {

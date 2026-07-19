@@ -1,4 +1,4 @@
-// LearnLoop Global State & Theme Manager
+// Learnova Global State & Theme Manager
 
 // Global Badges Directory
 var BADGES_LIST = [
@@ -10,7 +10,7 @@ var BADGES_LIST = [
   {
     name: "Active Learner",
     icon: "🚀",
-    desc: "Registered and started learning on LearnLoop",
+    desc: "Registered and started learning on Learnova",
   },
   {
     name: "Community Helper",
@@ -165,7 +165,7 @@ class LearnLoopDB {
             authorHeadline: "Keynote Speaker & Business English Coach",
             authorAvatar: `<svg viewBox="0 0 100 100" class="avatar-svg"><defs><linearGradient id="av-3-p" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#10B981" /><stop offset="100%" stop-color="#3B82F6" /></linearGradient></defs><circle cx="50" cy="50" r="50" fill="url(#av-3-p)"/><text x="50" y="58" font-size="28" font-weight="700" fill="#FFF" text-anchor="middle">SJ</text></svg>`,
             caption:
-              "Just completed an amazing public speaking swap on LearnLoop! Elena gave me great notes on CSS grids, and I helped her structure her keynote pitch. Truly a community of builders. 💡🎨",
+              "Just completed an amazing public speaking swap on Learnova! Elena gave me great notes on CSS grids, and I helped her structure her keynote pitch. Truly a community of builders. 💡🎨",
             photoType: "study", // study workspace SVG
             timestamp: "2 hours ago",
             likes: 8,
@@ -752,7 +752,7 @@ function getGlobalNavbarHTML(activePage) {
           <circle cx="14" cy="12" r="8" stroke="var(--logo-purple)" stroke-width="3.5" />
           <circle cx="27" cy="12" r="8" stroke="var(--logo-grey)" stroke-width="3.5" stroke-opacity="0.9" />
         </svg>
-        <span>LearnLoop</span>
+        <span>Learnova</span>
       </a>
       <ul class="nav-links">
         <li><a href="index.html" class="nav-link ${activePage === "landing" ? "active" : ""}">Home</a></li>
@@ -778,7 +778,7 @@ function getSidebarHTML(activePage) {
       <button class="mobile-sidebar-toggle" id="mobile-sidebar-toggle" aria-label="Toggle Sidebar">
         <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
       </button>
-      <div class="mobile-logo-text">LearnLoop</div>
+      <div class="mobile-logo-text">Learnova</div>
       <div class="mobile-avatar-wrap">${getAvatarHTML(user)}</div>
     </div>
     
@@ -792,7 +792,7 @@ function getSidebarHTML(activePage) {
             <circle cx="14" cy="12" r="8" stroke="var(--logo-purple)" stroke-width="3.5" />
             <circle cx="27" cy="12" r="8" stroke="var(--logo-grey)" stroke-width="3.5" stroke-opacity="0.9" />
           </svg>
-          <span class="logo-name">LearnLoop</span>
+          <span class="logo-name">Learnova</span>
         </a>
         <button class="sidebar-collapse-btn" id="desktop-sidebar-collapse-btn" aria-label="Collapse Sidebar">
           <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
