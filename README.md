@@ -1,8 +1,8 @@
-# LearnLoop - A Peer-to-Peer Skill Exchange Platform
+# Learnova - A Peer-to-Peer Skill Exchange Platform
 
 ## 📖 Overview
 
-LearnLoop is a web-based platform that enables users to exchange skills by teaching what they know and learning what they want. Instead of paying for courses, users collaborate with each other through a skill barter system, creating a community-driven learning environment.
+Learnova is a web-based platform that enables users to exchange skills by teaching what they know and learning what they want. Instead of paying for courses, users collaborate with each other through a skill barter system, creating a community-driven learning environment.
 
 ---
 
