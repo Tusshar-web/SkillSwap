@@ -7,6 +7,7 @@ const {
   acceptExchangeRequest,
   rejectExchangeRequest,
   cancelExchangeRequest,
+  markCompleted
 } = require("../models/exchangeRequestModel");
 
 const { getSkillById } = require("../models/skillModel");
@@ -258,6 +259,65 @@ const cancelRequest = async (req, res) => {
   }
 };
 
+const completeRequest = async (req, res) => {
+
+    try {
+
+        const request =
+            await getExchangeRequestById(req.params.id);
+
+        if (!request) {
+            return res.status(404).json({
+                success: false,
+                message: "Request not found."
+            });
+        }
+
+        if (
+            request.sender_id !== req.user.id &&
+            request.receiver_id !== req.user.id
+        ) {
+            return res.status(403).json({
+                success: false,
+                message: "Unauthorized."
+            });
+        }
+
+        if (request.status !== "accepted") {
+            return res.status(400).json({
+                success: false,
+                message: "Only accepted requests can be completed."
+            });
+        }
+
+        const updated =
+            await markCompleted(
+                req.params.id,
+                req.user.id
+            );
+
+        res.json({
+            success: true,
+            message:
+                updated.status === "completed"
+                ? "Exchange completed successfully."
+                : "Waiting for the other user to confirm completion.",
+            request: updated
+        });
+
+    } catch (err) {
+
+        console.error(err);
+
+        res.status(500).json({
+            success: false,
+            message: err.message
+        });
+
+    }
+
+};
+
 module.exports = {
   createRequest,
   getIncoming,
@@ -265,4 +325,5 @@ module.exports = {
   acceptRequest,
   rejectRequest,
   cancelRequest,
+  completeRequest
 };

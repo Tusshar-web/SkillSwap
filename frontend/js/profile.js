@@ -549,16 +549,37 @@ function renderProfileBadges() {
 }
 
 // Render Recommendations & Reviews
-function renderProfileReviews() {
+async function renderProfileReviews() {
   const listDiv = document.getElementById("profile-reviews-list");
   if (!listDiv) return;
 
-  const reviews = db.getData("ll_reviews");
+  const user = db.getCurrentUser();
+  if (!user) return;
+  const backendId = user.backendId || (user.id && user.id.startsWith("user-") ? user.id.replace("user-", "") : user.id);
+
+  let reviews = [];
+  try {
+    const res = await fetch(`http://localhost:5009/api/reviews/user/${backendId}`);
+    if (res.ok) {
+      const data = await res.json();
+      if (data.success && data.reviews) {
+        reviews = data.reviews.map(r => ({
+          id: r.review_id,
+          rating: parseInt(r.rating),
+          text: r.comment,
+          authorName: r.reviewer_name,
+          date: new Date(r.created_at).toLocaleDateString()
+        }));
+      }
+    }
+  } catch (err) {
+    console.error("Error fetching reviews from backend:", err);
+  }
   
   if (reviews.length === 0) {
     listDiv.innerHTML = `<div class="empty-state" style="padding:12px 0; color:var(--text-muted);"><p>No recommendation feedback logged yet.</p></div>`;
-    document.getElementById("avg-rating-value").textContent = "5.0 / 5.0";
-    document.getElementById("avg-stars-container").textContent = "★★★★★";
+    document.getElementById("avg-rating-value").textContent = "0.0 / 5.0";
+    document.getElementById("avg-stars-container").textContent = "☆☆☆☆☆";
     document.getElementById("rating-review-count").textContent = "0";
     return;
   }

@@ -28,6 +28,8 @@ const chatRoutes = require("./routes/chatRoutes");
 app.use("/api/chat", chatRoutes);
 const exchangeRequestRoutes = require("./routes/exchangeRequestRoutes");
 app.use("/api/exchange-requests", exchangeRequestRoutes);
+const reviewRoutes = require("./routes/reviewRoutes");
+app.use("/api/reviews", reviewRoutes);
 // Protected Route
 const authMiddleware = require("./middleware/authMiddleware");
 app.get("/test", authMiddleware, (req, res) => {

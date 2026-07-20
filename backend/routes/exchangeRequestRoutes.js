@@ -9,7 +9,8 @@ const {
     getOutgoing,
     acceptRequest,
     rejectRequest,
-    cancelRequest
+    cancelRequest,
+    completeRequest
 } = require("../controllers/exchangeRequestController");
 
 
@@ -19,5 +20,6 @@ router.get("/outgoing",authMiddleware,getOutgoing);
 router.put("/:id/accept",authMiddleware,acceptRequest);
 router.put("/:id/reject",authMiddleware,rejectRequest);
 router.delete("/:id",authMiddleware,cancelRequest);
+router.put("/:id/complete",authMiddleware,completeRequest);
 
 module.exports = router;

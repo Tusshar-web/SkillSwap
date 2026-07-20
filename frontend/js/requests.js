@@ -214,6 +214,17 @@ function renderRequests() {
         const statClass = "status-" + r.status.toLowerCase();
         const roleStr = r.senderId === currentUser.id ? "Outgoing" : "Incoming";
 
+        let actionBtn = "";
+        if (r.status.toLowerCase() === "completed") {
+          actionBtn = `<div class="req-actions-row" style="margin-top: 10px;">
+              <button class="btn btn-primary btn-sm review-exchange-btn" data-id="${r.id}" data-backend-id="${r.backendId || ''}">Leave Review</button>
+            </div>`;
+        } else if (r.status.toLowerCase() === "accepted") {
+          actionBtn = `<div class="req-actions-row" style="margin-top: 10px;">
+              <button class="btn btn-secondary btn-sm mark-completed-btn" data-id="${r.id}" data-backend-id="${r.backendId || ''}">Mark Completed</button>
+            </div>`;
+        }
+
         historyDiv.innerHTML += `
           <div class="req-item-card glass" style="opacity: 0.85;">
             <div class="req-card-top">
@@ -227,10 +238,56 @@ function renderRequests() {
             <div class="req-barter-visual" style="margin-bottom:0;">
               <strong>Offered:</strong> ${r.skillOffered} &nbsp;&harr;&nbsp; <strong>Wanted:</strong> ${r.skillWanted}
             </div>
+            ${actionBtn}
           </div>
         `;
       });
+
+      document.querySelectorAll(".review-exchange-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+          openExchangeReviewModal(btn.getAttribute("data-id"), btn.getAttribute("data-backend-id"));
+        });
+      });
+      document.querySelectorAll(".mark-completed-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+          markExchangeCompleted(btn.getAttribute("data-id"));
+        });
+      });
     }
+  }
+}
+
+async function markExchangeCompleted(reqId) {
+  const requests = db.getData("ll_requests");
+  const req = requests.find(r => r.id === reqId);
+  if (!req) return;
+
+  const token = sessionStorage.getItem("token") || localStorage.getItem("token");
+  const backendId = req.backendId || (req.id && req.id.startsWith("er-") ? req.id.replace("er-", "") : null);
+
+  if (token && backendId) {
+    try {
+      const res = await fetch(`http://localhost:5009/api/exchange-requests/${backendId}/complete`, {
+        method: "PUT",
+        headers: { "Authorization": `Bearer ${token}` }
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        showToast(data.message || "Failed to mark as completed.", "error");
+        return;
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  req.status = "Completed";
+  db.saveData("ll_requests", requests);
+  showToast("Exchange marked as completed.", "success");
+  if (token && backendId) {
+    await db.syncExchangeRequests();
+  } else {
+    renderRequests();
   }
 }
 
@@ -682,11 +739,39 @@ function setupReviewModalEvents() {
     });
   });
 
-  form.addEventListener("submit", (e) => {
+  form.addEventListener("submit", async (e) => {
     e.preventDefault();
     const sessId = document.getElementById("review-session-id").value;
+    const exchangeId = document.getElementById("review-exchange-id") ? document.getElementById("review-exchange-id").value : "";
+    const backendId = document.getElementById("review-backend-id") ? document.getElementById("review-backend-id").value : "";
     const rating = parseInt(ratingInput.value);
     const feedback = document.getElementById("review-feedback-msg").value.trim();
+
+    if (exchangeId) {
+      const token = sessionStorage.getItem("token") || localStorage.getItem("token");
+      const bId = backendId || (exchangeId.startsWith("er-") ? exchangeId.replace("er-", "") : null);
+      if (token && bId) {
+        try {
+          const res = await fetch(`http://localhost:5009/api/reviews`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
+            body: JSON.stringify({ request_id: bId, rating: rating, comment: feedback })
+          });
+          const data = await res.json();
+          if (!res.ok) {
+            showToast(data.message || "Failed to submit review", "error");
+            return;
+          }
+        } catch (err) {
+          console.error("Error submitting review:", err);
+          showToast("Failed to submit review", "error");
+          return;
+        }
+      }
+      closeModal();
+      showToast("Feedback submitted successfully!", "success");
+      return;
+    }
 
     const sessions = db.getData("ll_sessions");
     const s = sessions.find(item => item.id === sessId);
@@ -741,11 +826,35 @@ function setupReviewModalEvents() {
   });
 }
 
+function openExchangeReviewModal(exchangeId, backendId) {
+  const modal = document.getElementById("review-modal");
+  if (!modal) return;
+
+  document.getElementById("review-session-id").value = "";
+  if (document.getElementById("review-exchange-id")) {
+    document.getElementById("review-exchange-id").value = exchangeId;
+  }
+  if (document.getElementById("review-backend-id")) {
+    document.getElementById("review-backend-id").value = backendId || "";
+  }
+  document.getElementById("review-feedback-msg").value = "";
+  
+  document.getElementById("review-rating-score").value = "5";
+  document.querySelectorAll(".star-interactive").forEach(s => {
+    s.classList.add("selected");
+  });
+
+  modal.classList.add("active");
+}
+
 function openReviewModal(sessId) {
   const modal = document.getElementById("review-modal");
   if (!modal) return;
 
   document.getElementById("review-session-id").value = sessId;
+  if (document.getElementById("review-exchange-id")) {
+    document.getElementById("review-exchange-id").value = "";
+  }
   document.getElementById("review-feedback-msg").value = "";
   
   document.getElementById("review-rating-score").value = "5";
