@@ -5,7 +5,7 @@ if (!token) {
     window.location.href = "login.html";
 }
 
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
   forceAuth();
 
   const user = db.getCurrentUser();
@@ -22,18 +22,26 @@ document.addEventListener("DOMContentLoaded", () => {
     greeting.textContent = `Hello, ${user.name}!`;
   }
 
-  document.getElementById("stat-offered").textContent = user.skillsOffered.length;
-  document.getElementById("stat-wanted").textContent = user.skillsWanted.length;
-  
-  const requests = db.getData("ll_requests");
-  const activeRequests = requests.filter(r => r.senderId === user.id || r.receiverId === user.id).length;
-  document.getElementById("stat-requests").textContent = activeRequests;
-
-  const sessions = db.getData("ll_sessions");
-  const completedSessions = sessions.filter(s => s.status === "Completed" && (s.partnerId === user.id || s.requestId)).length;
-  document.getElementById("stat-sessions").textContent = completedSessions + user.exchangesCompleted;
-
-  document.getElementById("stat-rating").textContent = user.rating.toFixed(1);
+  try {
+    const res = await fetch("http://localhost:5009/api/users/dashboard-stats", {
+      headers: { "Authorization": `Bearer ${token}` }
+    });
+    const data = await res.json();
+    if (data.success) {
+      document.getElementById("stat-offered").textContent = data.stats.offeredCount ?? 0;
+      document.getElementById("stat-wanted").textContent = data.stats.wantedCount ?? 0;
+      document.getElementById("stat-requests").textContent = data.stats.activeRequests ?? 0;
+      document.getElementById("stat-sessions").textContent = data.stats.completedSessions ?? 0;
+      document.getElementById("stat-rating").textContent = (data.stats.rating ?? 0.0).toFixed(1);
+    }
+  } catch (err) {
+    console.error("Failed to load dashboard stats", err);
+    document.getElementById("stat-offered").textContent = "-";
+    document.getElementById("stat-wanted").textContent = "-";
+    document.getElementById("stat-requests").textContent = "-";
+    document.getElementById("stat-sessions").textContent = "-";
+    document.getElementById("stat-rating").textContent = "-";
+  }
 
   drawActivityChart();
   renderUpcomingSessions();
@@ -56,19 +64,47 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 });
 
-function drawActivityChart() {
+async function drawActivityChart() {
   const container = document.getElementById("activity-chart");
   if (!container) return;
+
+  let months = ["Jan", "Feb", "Mar", "Apr", "May"];
+  let teachHours = [0, 0, 0, 0, 0];
+  let learnHours = [0, 0, 0, 0, 0];
+
+  try {
+    const token = sessionStorage.getItem("token");
+    const res = await fetch("http://localhost:5009/api/users/activity-stats", {
+      headers: { "Authorization": `Bearer ${token}` }
+    });
+    const data = await res.json();
+    if (data.success && data.data) {
+      months = data.data.months;
+      teachHours = data.data.teachHours;
+      learnHours = data.data.learnHours;
+    }
+  } catch (err) {
+    console.error("Failed to fetch activity stats", err);
+  }
+
+  const maxData = Math.max(...teachHours, ...learnHours);
+  
+  if (maxData === 0) {
+    container.innerHTML = `
+      <div class="empty-state" style="height: 200px; display: flex; align-items: center; justify-content: center; flex-direction: column;">
+        <svg width="32" height="32" fill="none" stroke="var(--text-muted)" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+        <p>No activity data yet.</p>
+      </div>
+    `;
+    return;
+  }
 
   const width = 500;
   const height = 200;
   const padding = 30;
 
-  const months = ["Feb", "Mar", "Apr", "May", "Jun"];
-  const teachHours = [5, 9, 12, 8, 15];
-  const learnHours = [7, 11, 8, 16, 20];
-
-  const maxVal = 24;
+  let maxVal = Math.ceil(maxData / 4) * 4;
+  if (maxVal < 4) maxVal = 4;
 
   const getX = (index) => padding + (index * (width - 2 * padding) / (months.length - 1));
   const getY = (val) => height - padding - (val * (height - 2 * padding) / maxVal);

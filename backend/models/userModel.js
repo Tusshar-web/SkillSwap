@@ -208,6 +208,91 @@ const updateProfilePicture = async (userId, imageUrl) => {
 
 };
 
+const getUserStats = async (userId) => {
+    const [offeredRows] = await db.execute(
+        "SELECT COUNT(*) as count FROM user_skills WHERE user_id = ? AND skill_type = 'offer'",
+        [userId]
+    );
+    const [wantedRows] = await db.execute(
+        "SELECT COUNT(*) as count FROM user_skills WHERE user_id = ? AND skill_type = 'want'",
+        [userId]
+    );
+    const [activeReqRows] = await db.execute(
+        "SELECT COUNT(*) as count FROM exchange_requests WHERE (sender_id = ? OR receiver_id = ?) AND status = 'pending'",
+        [userId, userId]
+    );
+    const [completedRows] = await db.execute(
+        "SELECT COUNT(*) as count FROM exchange_requests WHERE (sender_id = ? OR receiver_id = ?) AND status = 'completed'",
+        [userId, userId]
+    );
+    const [ratingRows] = await db.execute(
+        "SELECT AVG(rating) as avg_rating FROM reviews WHERE reviewee_id = ?",
+        [userId]
+    );
+
+    return {
+        offeredCount: offeredRows[0].count,
+        wantedCount: wantedRows[0].count,
+        activeRequests: activeReqRows[0].count,
+        completedSessions: completedRows[0].count,
+        rating: ratingRows[0].avg_rating ? parseFloat(ratingRows[0].avg_rating) : 0.0
+    };
+};
+
+const getActivityStats = async (userId) => {
+    const monthsData = [];
+    const d = new Date();
+    d.setDate(1); 
+    
+    const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    
+    for (let i = 4; i >= 0; i--) {
+        const temp = new Date(d);
+        temp.setMonth(d.getMonth() - i);
+        monthsData.push({
+            name: monthNames[temp.getMonth()],
+            year: temp.getFullYear(),
+            monthNum: temp.getMonth() + 1 
+        });
+    }
+
+    const teachHours = [0, 0, 0, 0, 0];
+    const learnHours = [0, 0, 0, 0, 0];
+
+    const [rows] = await db.execute(`
+        SELECT 
+            MONTH(updated_at) as month,
+            YEAR(updated_at) as year,
+            sender_id,
+            receiver_id,
+            sender_user_skill_id,
+            receiver_user_skill_id
+        FROM exchange_requests
+        WHERE status = 'completed' 
+        AND (sender_id = ? OR receiver_id = ?)
+        AND updated_at >= DATE_SUB(CURDATE(), INTERVAL 6 MONTH)
+    `, [userId, userId]);
+
+    rows.forEach(row => {
+        const idx = monthsData.findIndex(m => m.monthNum === row.month && m.year === row.year);
+        if (idx !== -1) {
+            if (row.sender_id === userId) {
+                if (row.sender_user_skill_id) teachHours[idx] += 1;
+                if (row.receiver_user_skill_id) learnHours[idx] += 1;
+            } else if (row.receiver_id === userId) {
+                if (row.receiver_user_skill_id) teachHours[idx] += 1;
+                if (row.sender_user_skill_id) learnHours[idx] += 1;
+            }
+        }
+    });
+
+    return {
+        months: monthsData.map(m => m.name),
+        teachHours,
+        learnHours
+    };
+};
+
 module.exports = {
     findUserByEmail,
     createUser,
@@ -218,5 +303,7 @@ module.exports = {
     verifyOTP,
     markEmailVerified,
     getUserOfferSkills,
-    updateProfilePicture
+    updateProfilePicture,
+    getUserStats,
+    getActivityStats
 };

@@ -30,6 +30,8 @@ const exchangeRequestRoutes = require("./routes/exchangeRequestRoutes");
 app.use("/api/exchange-requests", exchangeRequestRoutes);
 const reviewRoutes = require("./routes/reviewRoutes");
 app.use("/api/reviews", reviewRoutes);
+const sessionRoutes = require("./routes/sessionRoutes");
+app.use("/api/sessions", sessionRoutes);
 // Protected Route
 const authMiddleware = require("./middleware/authMiddleware");
 app.get("/test", authMiddleware, (req, res) => {

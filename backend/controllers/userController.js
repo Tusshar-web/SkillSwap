@@ -4,7 +4,9 @@ const {
   updateUserProfile,
   getUserProfile,
   getUserOfferSkills,
-  updateProfilePicture
+  updateProfilePicture,
+  getUserStats,
+  getActivityStats
 } = require("../models/userModel");
 
 const getProfile = async (req, res) => {
@@ -243,11 +245,39 @@ const uploadProfilePicture = async (req, res) => {
 
 };
 
+const getDashboardStats = async (req, res) => {
+    try {
+        const stats = await getUserStats(req.user.id);
+        res.json({
+            success: true,
+            stats
+        });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({
+            success: false,
+            message: err.message
+        });
+    }
+};
+
+const getActivityStatsController = async (req, res) => {
+    try {
+        const data = await getActivityStats(req.user.id);
+        res.json({ success: true, data });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ success: false, message: err.message });
+    }
+};
+
 module.exports = {
   getProfile,
   updateProfile,
   getMyProfile,
   getAllUsers,
   getOfferSkills,
-  uploadProfilePicture
+  uploadProfilePicture,
+  getDashboardStats,
+  getActivityStatsController
 };

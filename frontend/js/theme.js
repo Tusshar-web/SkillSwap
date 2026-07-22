@@ -236,6 +236,7 @@ class LearnLoopDB {
       }
       await this.syncMySkills();
       await this.syncExchangeRequests();
+      await this.syncSessions();
     } catch (err) {
       console.error("Could not fetch actual users from backend:", err);
     }
@@ -337,6 +338,63 @@ class LearnLoopDB {
       }
     } catch (err) {
       console.error("Could not sync exchange requests from backend:", err);
+    }
+  }
+
+  async syncSessions() {
+    const token = sessionStorage.getItem("token") || localStorage.getItem("token");
+    if (!token) return;
+    try {
+      const res = await fetch("http://localhost:5009/api/sessions", {
+        headers: { "Authorization": `Bearer ${token}` }
+      });
+      if (!res.ok) return;
+      const json = await res.json();
+      if (json.success && Array.isArray(json.sessions)) {
+        const currentUser = this.getCurrentUser();
+        const allUsers = this.getData("ll_users");
+        
+        const formatted = json.sessions.map(s => {
+          const p1 = s.partner_1_id;
+          const p2 = s.partner_2_id;
+          const myId = currentUser.backendId;
+          const partnerId = p1 == myId ? p2 : p1;
+          const partner = allUsers.find(u => u.backendId == partnerId);
+          
+          let stat = "Upcoming";
+          if (s.status === 'completed') {
+            stat = "Completed";
+          } else if (s.status === 'cancelled') {
+            stat = "Cancelled";
+          } else {
+            const myCompleted = p1 == myId ? s.partner_1_completed : s.partner_2_completed;
+            if (myCompleted) {
+              stat = "Waiting for Partner";
+            }
+          }
+          
+          let dateStr = s.scheduled_date;
+          if (dateStr.includes('T')) dateStr = dateStr.split('T')[0];
+          
+          return {
+            id: s.id, 
+            backendId: s.id,
+            requestId: s.request_id,
+            partnerId: partner ? partner.id : ("user-" + partnerId),
+            partnerName: partner ? partner.name : "Partner",
+            date: dateStr,
+            time: s.scheduled_time ? s.scheduled_time.substring(0, 5) : "00:00",
+            timezone: s.timezone,
+            topic: s.topic,
+            status: stat
+          };
+        });
+        
+        this.saveData("ll_sessions", formatted);
+        window.dispatchEvent(new CustomEvent("ll_sessions_updated"));
+      }
+    } catch (err) {
+      console.error("Could not sync sessions:", err);
     }
   }
 }
