@@ -190,6 +190,24 @@ const getUserOfferSkills = async (userId) => {
     return rows;
 };
 
+const updateProfilePicture = async (userId, imageUrl) => {
+
+    const [result] = await db.execute(
+        `
+        UPDATE users
+        SET profile_picture = ?
+        WHERE id = ?
+        `,
+        [
+            imageUrl,
+            userId
+        ]
+    );
+
+    return result;
+
+};
+
 module.exports = {
     findUserByEmail,
     createUser,
@@ -199,5 +217,6 @@ module.exports = {
     saveOTP,
     verifyOTP,
     markEmailVerified,
-    getUserOfferSkills
+    getUserOfferSkills,
+    updateProfilePicture
 };

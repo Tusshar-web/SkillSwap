@@ -151,7 +151,7 @@ function setupProfileModalEvents() {
   closeBtn.addEventListener("click", closeModal);
   cancelBtn.addEventListener("click", closeModal);
 
-  form.addEventListener("submit", (e) => {
+  form.addEventListener("submit", async (e) => {
     e.preventDefault();
     const user = db.getCurrentUser();
     
@@ -164,9 +164,44 @@ function setupProfileModalEvents() {
     // Save custom banner URL
     user.banner = document.getElementById("edit-banner-url").value.trim() || "";
 
+    const avatarFile = document.getElementById("edit-avatar-file").files[0];
+    let fileUploadedUrl = null;
+
+    if (avatarFile) {
+      try {
+        const formData = new FormData();
+        formData.append("image", avatarFile);
+        const token = sessionStorage.getItem("token");
+
+        showToast("Uploading profile picture...", "info");
+
+        const res = await fetch("http://localhost:5009/api/users/profile-picture", {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${token}`
+          },
+          body: formData
+        });
+
+        const data = await res.json();
+        if (data.success && data.profile_picture) {
+          fileUploadedUrl = data.profile_picture;
+          // Clear the file input for next time
+          document.getElementById("edit-avatar-file").value = "";
+        } else {
+          showToast(data.message || "Failed to upload picture", "error");
+        }
+      } catch (err) {
+        console.error("Image upload failed:", err);
+        showToast("Error uploading profile picture", "error");
+      }
+    }
+
     // Save custom avatar picture URL or generate SVG stops
     const avatarUrl = document.getElementById("edit-avatar-url").value.trim();
-    if (avatarUrl) {
+    if (fileUploadedUrl) {
+      user.avatar = fileUploadedUrl;
+    } else if (avatarUrl) {
       user.avatar = avatarUrl;
     } else {
       const colorVal = document.querySelector('input[name="edit-avatar-color"]:checked').value;
