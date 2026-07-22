@@ -1,8 +1,10 @@
+const uploadToCloudinary = require("../utils/uploadToCloudinary");
 const {
   getUserById,
   updateUserProfile,
   getUserProfile,
-  getUserOfferSkills
+  getUserOfferSkills,
+  updateProfilePicture
 } = require("../models/userModel");
 
 const getProfile = async (req, res) => {
@@ -202,10 +204,50 @@ const getOfferSkills = async (req, res) => {
 
 };
 
+const uploadProfilePicture = async (req, res) => {
+
+    try {
+
+        if (!req.file) {
+            return res.status(400).json({
+                success: false,
+                message: "No image uploaded."
+            });
+        }
+
+        const result = await uploadToCloudinary(
+            req.file.buffer,
+            "LearnLoop/profiles"
+        );
+
+        await updateProfilePicture(
+            req.user.id,
+            result.secure_url
+        );
+
+        res.json({
+            success: true,
+            profile_picture: result.secure_url
+        });
+
+    } catch (err) {
+
+        console.error(err);
+
+        res.status(500).json({
+            success: false,
+            message: err.message
+        });
+
+    }
+
+};
+
 module.exports = {
   getProfile,
   updateProfile,
   getMyProfile,
   getAllUsers,
-  getOfferSkills
+  getOfferSkills,
+  uploadProfilePicture
 };

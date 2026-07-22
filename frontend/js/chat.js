@@ -78,7 +78,9 @@ function renderConversationsSidebar(partnersList) {
   }
 
   container.innerHTML = "";
+  const allUsers = db.getData("ll_users") || [];
   list.forEach((p) => {
+    const partnerUser = allUsers.find(u => u.backendId == p.partner_id || u.id == p.partner_id || u.id === `user-${p.partner_id}`) || { name: p.partner_name };
     const cRecord = chats.find((c) => c.partnerId === p.partner_id);
     const lastMsgObj = cRecord
       ? cRecord.messages[cRecord.messages.length - 1]
@@ -99,7 +101,7 @@ class="conv-item ${isActive}"
 data-request-id="${p.request_id}"
 data-partner-id="${p.partner_id}"
 data-partner-name="${p.partner_name}">        
-<div class="conv-avatar online">${getAvatarHTML({ name: p.partner_name })}</div>
+<div class="conv-avatar online">${getAvatarHTML(partnerUser)}</div>
         <div class="conv-details">
           <div class="conv-name-row">
             <span class="conv-name">${p.partner_name}</span>
@@ -136,10 +138,11 @@ async function selectConversation(requestId, partnerId, partnerName) {
   activePartnerId = partnerId;
   activeRequestId = requestId;
 
+  const allUsers = db.getData("ll_users") || [];
+  const partnerUser = allUsers.find(u => u.backendId == partnerId || u.id == partnerId || u.id === `user-${partnerId}`) || { name: partnerName };
+
   document.getElementById("active-partner-name").textContent = partnerName;
-  document.getElementById("active-partner-avatar").innerHTML = getAvatarHTML({
-    name: partnerName,
-  });
+  document.getElementById("active-partner-avatar").innerHTML = getAvatarHTML(partnerUser);
   document.getElementById("chat-empty-state").style.display = "none";
   document.getElementById("chat-active-panel").style.display = "flex";
 
