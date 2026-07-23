@@ -10,6 +10,7 @@ const {
   markCompleted
 } = require("../models/exchangeRequestModel");
 
+const {createNotification} = require("../models/notifcationModel");
 const { getSkillById } = require("../models/skillModel");
 
 // Create Exchange Request
@@ -84,12 +85,19 @@ const createRequest = async (req, res) => {
       });
     }
 
-    await createExchangeRequest(
+    const result = await createExchangeRequest(
       senderId,
       receiver_id,
       sender_user_skill_id,
       receiver_user_skill_id,
       message || "",
+    );
+
+    await createNotification(
+    receiver_id,          // User who receives the notification
+    senderId,             // User who performed the action
+    "request",
+    result.insertId       // Newly created request_id
     );
 
     res.status(201).json({
@@ -170,6 +178,14 @@ const acceptRequest = async (req, res) => {
     }
     await acceptExchangeRequest(req.params.id);
 
+    // Notify the sender that their request was accepted
+    await createNotification(
+      request.sender_id,
+      req.user.id,
+      "request_accepted",
+      req.params.id
+    );
+
     res.json({
       success: true,
       message: "Request accepted.",
@@ -210,6 +226,15 @@ const rejectRequest = async (req, res) => {
         message: "This request has already been processed.",
       });
     }
+
+    // Notify the sender that their request was rejected
+    await createNotification(
+      request.sender_id,
+      req.user.id,
+      "request_rejected",
+      req.params.id
+    );
+
     res.json({
       success: true,
       message: "Request rejected.",

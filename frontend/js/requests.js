@@ -21,6 +21,11 @@ document.addEventListener("DOMContentLoaded", () => {
     setupTheme();
   }
 
+  // Clear requests-related notifications automatically when visiting this page
+  if (typeof clearPageNotifications === "function") {
+    setTimeout(() => clearPageNotifications("requests"), 200);
+  }
+
   const today = new Date();
   currentYear = 2026;
   currentMonth = today.getMonth();
@@ -43,6 +48,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   db.syncExchangeRequests();
+  db.syncSessions();
 
   window.addEventListener("ll_users_updated", () => {
     renderRequests();
@@ -51,6 +57,10 @@ document.addEventListener("DOMContentLoaded", () => {
   });
   window.addEventListener("ll_requests_updated", () => {
     renderRequests();
+    drawCalendar();
+    renderAgenda(selectedDateStr);
+  });
+  window.addEventListener("ll_sessions_updated", () => {
     drawCalendar();
     renderAgenda(selectedDateStr);
   });
@@ -347,7 +357,7 @@ async function acceptRequest(reqId) {
   notifs.unshift({
     id: "notif-" + Date.now(),
     type: "session",
-    text: `Upcoming session scheduled with ${pName} on ${newSession.date}.`,
+    text: `Upcoming session scheduled with ${pName} on ${nextWeekDate.toISOString().split('T')[0]}.`,
     time: "Just now",
     unread: true
   });
@@ -619,15 +629,38 @@ function renderAgenda(dateStr) {
   });
 }
 
-function cancelSession(sessId) {
+async function cancelSession(sessId) {
   const sessions = db.getData("ll_sessions");
-  const idx = sessions.findIndex(s => s.id === sessId);
+  const idx = sessions.findIndex(s => s.id == sessId);
   if (idx !== -1) {
+    const sessionToCancel = sessions[idx];
+    const token = sessionStorage.getItem("token") || localStorage.getItem("token");
+    if (token && sessionToCancel.backendId) {
+      try {
+        const res = await fetch(`http://localhost:5009/api/sessions/${sessionToCancel.backendId}`, {
+          method: "DELETE",
+          headers: { "Authorization": `Bearer ${token}` }
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          showToast(data.message || "Failed to cancel session.", "error");
+          return;
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
     const removed = sessions.splice(idx, 1)[0];
     db.saveData("ll_sessions", sessions);
     showToast(`Cancelled session: ${removed.topic}`, "info");
-    drawCalendar();
-    renderAgenda(selectedDateStr);
+    
+    if (token && sessionToCancel.backendId) {
+      await db.syncSessions();
+    } else {
+      drawCalendar();
+      renderAgenda(selectedDateStr);
+    }
   }
 }
 

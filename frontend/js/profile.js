@@ -32,7 +32,10 @@ document.addEventListener("DOMContentLoaded", () => {
   // 5. Render LinkedIn style Experience Timeline
   renderExperienceTimeline();
 
-  // 6. Wire profile details modal
+  // 6. Render My Posts
+  renderMyPosts();
+
+  // 7. Wire profile details modal
   setupProfileModalEvents();
 
   // 7. Wire skill modals
@@ -661,5 +664,84 @@ function triggerBadgeUnlockNotif(badgeName) {
     unread: true
   });
   db.saveData("ll_notifications", notifs);
-  showToast(`🏆 Badge Unlocked: ${badgeName}!`, "success");
+  window.dispatchEvent(new Event("ll_notifications_updated"));
+}
+
+async function renderMyPosts() {
+  const container = document.getElementById("profile-my-posts-list");
+  if (!container) return;
+
+  const token = sessionStorage.getItem("token") || localStorage.getItem("token");
+  if (!token) return;
+  const user = db.getCurrentUser();
+  if (!user || !user.backendId) return;
+
+  try {
+    const res = await fetch("http://localhost:5009/api/posts", {
+      headers: { "Authorization": `Bearer ${token}` }
+    });
+    const data = await res.json();
+    if (data.success) {
+      const myPosts = data.posts.filter(p => p.user_id == user.backendId);
+      
+      if (myPosts.length === 0) {
+        container.innerHTML = `<div class="empty-state" style="padding: 20px 0; text-align:center; color:var(--text-muted);"><p>You haven't shared any posts yet.</p></div>`;
+        return;
+      }
+
+      container.innerHTML = "";
+      myPosts.forEach(post => {
+        let timeString = "Just now";
+        if (post.created_at) {
+          const d = new Date(post.created_at);
+          timeString = d.toLocaleDateString() + " " + d.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+        }
+
+        container.innerHTML += `
+          <div class="my-post-item" style="border-bottom: 1px solid var(--border-color); padding: 16px 0;">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+              <div style="display:flex; flex-direction:column; gap:8px; flex-grow:1; padding-right:16px;">
+                <div style="display:flex; align-items:center; gap:8px;">
+                  <span style="background:var(--brand-primary); color:#fff; padding:2px 8px; border-radius:12px; font-size:11px; font-weight:600; text-transform:uppercase;">${post.post_type}</span>
+                  <span style="font-size:12px; color:var(--text-muted);">${timeString}</span>
+                </div>
+                <p style="margin:0; font-size:14px; color:var(--text-secondary); line-height:1.5;">${post.content}</p>
+              </div>
+              <button class="btn btn-icon delete-post-btn" data-id="${post.post_id}" style="color:#ef4444; border:1px solid #ef4444; background:transparent; border-radius:8px; padding:6px;" title="Delete Post">
+                <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+              </button>
+            </div>
+            ${post.image_url ? `<img src="${post.image_url}" style="width:100%; max-height:300px; object-fit:cover; border-radius:8px; margin-top:12px;" alt="Post Image">` : ''}
+          </div>
+        `;
+      });
+
+      // Attach delete listeners
+      document.querySelectorAll(".delete-post-btn").forEach(btn => {
+        btn.addEventListener("click", async () => {
+          if (!confirm("Are you sure you want to delete this post?")) return;
+          const postId = btn.getAttribute("data-id");
+          try {
+            const delRes = await fetch(`http://localhost:5009/api/posts/${postId}`, {
+              method: "DELETE",
+              headers: { "Authorization": `Bearer ${token}` }
+            });
+            const delData = await delRes.json();
+            if (delData.success) {
+              showToast("Post deleted successfully.", "success");
+              renderMyPosts();
+            } else {
+              showToast(delData.message || "Failed to delete post.", "error");
+            }
+          } catch(err) {
+            console.error(err);
+            showToast("Error connecting to server.", "error");
+          }
+        });
+      });
+    }
+  } catch(err) {
+    console.error("Failed to load my posts", err);
+    container.innerHTML = `<div class="empty-state" style="padding: 20px 0; text-align:center; color:var(--text-muted);"><p>Error loading posts.</p></div>`;
+  }
 }

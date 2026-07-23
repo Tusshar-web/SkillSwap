@@ -1,5 +1,7 @@
 let activePartnerId = null;
 let activeRequestId = null;
+let onlineUserIds = new Set();
+let globalPartnersList = [];
 // Learnova Direct Messaging Logic
 const token = sessionStorage.getItem("token");
 
@@ -11,6 +13,24 @@ SocketService.connectSocket(token);
 const chatSocket = SocketService.getSocket();
 
 chatSocket.on("newMessage", (msg) => {
+  const partner = globalPartnersList.find(p => p.request_id == msg.request_id);
+  if (partner) {
+    partner.last_message = msg.message;
+    partner.last_message_time = msg.created_at || new Date().toISOString();
+    
+    const currentUser = db.getCurrentUser();
+    let myId = null;
+    if (currentUser) {
+        myId = currentUser.backendId || currentUser.id;
+        if (typeof myId === "string" && myId.startsWith("user-")) myId = parseInt(myId.split("-")[1]);
+    }
+    
+    if (msg.request_id != activeRequestId && msg.receiver_id == myId) {
+      partner.unread_count = (partner.unread_count || 0) + 1;
+    }
+    renderConversationsSidebar(globalPartnersList);
+  }
+
   if (msg.request_id != activeRequestId) return;
   appendMessage(msg);
 });
@@ -20,6 +40,34 @@ chatSocket.on("errorMessage", (msg) => {
   showToast(msg, "error");
 });
 
+chatSocket.on("userStatusChange", (data) => {
+  if (data.isOnline) {
+    onlineUserIds.add(String(data.userId));
+  } else {
+    onlineUserIds.delete(String(data.userId));
+  }
+  renderConversationsSidebar(globalPartnersList);
+  
+  if (String(activePartnerId) === String(data.userId)) {
+     const statusEl = document.getElementById("active-chat-status");
+     if (statusEl) {
+        if (data.isOnline) {
+          statusEl.innerHTML = `<span class="status-indicator"></span> Online`;
+          statusEl.style.opacity = "1";
+        } else {
+          statusEl.innerHTML = `<span class="status-indicator" style="background:#6b7280;box-shadow:none;"></span> Offline`;
+          statusEl.style.opacity = "0.7";
+        }
+     }
+  }
+});
+
+chatSocket.emit("getOnlineUsers", (users) => {
+  if (users && Array.isArray(users)) {
+    users.forEach(u => onlineUserIds.add(String(u)));
+    renderConversationsSidebar(globalPartnersList);
+  }
+});
 
 document.addEventListener("DOMContentLoaded", () => {
   forceAuth();
@@ -31,6 +79,10 @@ document.addEventListener("DOMContentLoaded", () => {
   if (sidebarContainer) {
     sidebarContainer.innerHTML = getSidebarHTML("chat");
     setupTheme();
+  }
+
+  if (typeof clearPageNotifications === "function") {
+    setTimeout(() => clearPageNotifications("chat"), 200);
   }
 
   initializeConversations();
@@ -48,7 +100,7 @@ document.addEventListener("DOMContentLoaded", () => {
 async function initializeConversations() {
   try {
     const conversations = await ChatAPI.getConversations();
-
+    globalPartnersList = conversations;
     renderConversationsSidebar(conversations);
   } catch (err) {
     console.error(err);
@@ -81,27 +133,27 @@ function renderConversationsSidebar(partnersList) {
   const allUsers = db.getData("ll_users") || [];
   list.forEach((p) => {
     const partnerUser = allUsers.find(u => u.backendId == p.partner_id || u.id == p.partner_id || u.id === `user-${p.partner_id}`) || { name: p.partner_name };
-    const cRecord = chats.find((c) => c.partnerId === p.partner_id);
-    const lastMsgObj = cRecord
-      ? cRecord.messages[cRecord.messages.length - 1]
-      : null;
-    const snippet = lastMsgObj ? lastMsgObj.text : "Click to start chatting";
-    const time = lastMsgObj ? lastMsgObj.time : "";
+    
+    const snippet = p.last_message ? p.last_message : "Click to start chatting";
+    let time = "";
+    if (p.last_message_time) {
+       const d = new Date(p.last_message_time);
+       time = d.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+    }
 
-    const unreadCount = cRecord
-      ? cRecord.messages.filter(
-          (m) => m.sender === p.partner_id && m.status === "unread",
-        ).length
-      : 0;
+    const unreadCount = p.unread_count || 0;
     const isActive = p.partner_id === activePartnerId ? "active" : "";
 
+    const isOnline = onlineUserIds.has(String(p.partner_id));
+    const onlineClass = isOnline ? "online" : "";
+    
     container.innerHTML += `
       <div
 class="conv-item ${isActive}"
 data-request-id="${p.request_id}"
 data-partner-id="${p.partner_id}"
 data-partner-name="${p.partner_name}">        
-<div class="conv-avatar online">${getAvatarHTML(partnerUser)}</div>
+<div class="conv-avatar ${onlineClass}">${getAvatarHTML(partnerUser)}</div>
         <div class="conv-details">
           <div class="conv-name-row">
             <span class="conv-name">${p.partner_name}</span>
@@ -146,11 +198,28 @@ async function selectConversation(requestId, partnerId, partnerName) {
   document.getElementById("chat-empty-state").style.display = "none";
   document.getElementById("chat-active-panel").style.display = "flex";
 
+  const statusEl = document.getElementById("active-chat-status");
+  if (statusEl) {
+    if (onlineUserIds.has(String(partnerId))) {
+      statusEl.innerHTML = `<span class="status-indicator"></span> Online`;
+      statusEl.style.opacity = "1";
+    } else {
+      statusEl.innerHTML = `<span class="status-indicator" style="background:#6b7280;box-shadow:none;"></span> Offline`;
+      statusEl.style.opacity = "0.7";
+    }
+  }
+
   const socket = SocketService.getSocket();
 
   socket.emit("joinRoom", requestId);
 
   await loadMessages(requestId);
+  
+  const partner = globalPartnersList.find(p => p.request_id == requestId);
+  if (partner && partner.unread_count > 0) {
+      partner.unread_count = 0;
+      renderConversationsSidebar(globalPartnersList);
+  }
 }
 
 async function loadMessages(requestId) {

@@ -409,7 +409,9 @@ document.addEventListener("DOMContentLoaded", () => {
   setupTheme();
   setupNavbarScroll();
   setupToastContainer();
-  setupDropdowns();
+  setTimeout(() => {
+    setupDropdowns();
+  }, 50);
   setupBackToTop();
   setupMobileToggle();
   setupStatsCounter();
@@ -613,6 +615,26 @@ function setupToastContainer() {
   }
 }
 
+async function updateNotificationBadge() {
+  const badge = document.getElementById("nav-bell-badge");
+  if (!badge) return;
+  const token = sessionStorage.getItem("token") || localStorage.getItem("token");
+  if (!token) return;
+  try {
+    const res = await fetch("http://localhost:5009/api/notifications/unread-count", {
+      headers: { "Authorization": `Bearer ${token}` }
+    });
+    const data = await res.json();
+    if (data.success && data.unreadCount > 0) {
+      badge.style.display = "block";
+    } else {
+      badge.style.display = "none";
+    }
+  } catch (err) {
+    console.error("Failed to fetch unread count", err);
+  }
+}
+
 // Notification & Avatar dropdown triggers
 function setupDropdowns() {
   const notifTrigger = document.querySelector(".notification-bell");
@@ -621,17 +643,32 @@ function setupDropdowns() {
   const userDropdown = document.querySelector(".user-dropdown");
 
   if (notifTrigger && notifDropdown) {
-    notifTrigger.addEventListener("click", (e) => {
+    notifTrigger.addEventListener("click", async (e) => {
       e.stopPropagation();
       notifDropdown.classList.toggle("active");
       if (userDropdown) userDropdown.classList.remove("active");
 
-      const badge = notifTrigger.querySelector(".bell-badge");
+      const badge = document.getElementById("nav-bell-badge") || notifTrigger.querySelector(".bell-badge");
       if (badge) badge.style.display = "none";
 
-      const notifs = db.getData("ll_notifications");
-      notifs.forEach((n) => (n.unread = false));
-      db.saveData("ll_notifications", notifs);
+      const badgeFeed = document.getElementById("badge-feed");
+      const badgeReq = document.getElementById("badge-requests");
+      const badgeChat = document.getElementById("badge-chat");
+      if (badgeFeed) badgeFeed.style.display = "none";
+      if (badgeReq) badgeReq.style.display = "none";
+      if (badgeChat) badgeChat.style.display = "none";
+
+      const token = sessionStorage.getItem("token") || localStorage.getItem("token");
+      if (token) {
+        try {
+          await fetch("http://localhost:5009/api/notifications/read-all", {
+            method: "PUT",
+            headers: { "Authorization": `Bearer ${token}` }
+          });
+        } catch (err) {
+          console.error("Failed to mark all as read", err);
+        }
+      }
     });
   }
 
@@ -649,37 +686,72 @@ function setupDropdowns() {
   });
 
   renderNotifications();
+  updateNotificationBadge();
+  
+  if (typeof SocketService !== "undefined") {
+    const globalToken = sessionStorage.getItem("token") || localStorage.getItem("token");
+    if (globalToken) {
+        SocketService.connectSocket(globalToken);
+    }
+  }
 }
 
-function renderNotifications() {
+async function renderNotifications() {
+  const token = sessionStorage.getItem("token") || localStorage.getItem("token");
+  if (!token) return;
+
+  let notifications = [];
+  try {
+    const res = await fetch("http://localhost:5009/api/notifications", {
+      headers: { "Authorization": `Bearer ${token}` }
+    });
+    const data = await res.json();
+    if (data.success) {
+      notifications = data.notifications;
+    }
+  } catch (err) {
+    console.error("Failed to load notifications", err);
+  }
+
+  // Sidebar badge logic
+  const unreadNotifs = notifications.filter(n => !n.is_read);
+  const showFeed = unreadNotifs.some(n => n.type && n.type.includes("post"));
+  const showRequests = unreadNotifs.some(n => n.type && (n.type.includes("request") || n.type === "session"));
+  const showChat = unreadNotifs.some(n => n.type === "chat");
+
+  const badgeFeed = document.getElementById("badge-feed");
+  const badgeReq = document.getElementById("badge-requests");
+  const badgeChat = document.getElementById("badge-chat");
+
+  if (badgeFeed) badgeFeed.style.display = showFeed ? "block" : "none";
+  if (badgeReq) badgeReq.style.display = showRequests ? "block" : "none";
+  if (badgeChat) badgeChat.style.display = showChat ? "block" : "none";
+
   const list = document.getElementById("notifications-list");
   if (!list) return;
 
-  const notifications = db.getData("ll_notifications");
   if (notifications.length === 0) {
     list.innerHTML = `<div class="dropdown-header" style="text-align:center; padding: 24px 0; color:var(--text-muted);">No new notifications</div>`;
     return;
   }
 
+
   list.innerHTML = "";
   notifications.forEach((n) => {
-    let iconStr = "";
-    if (n.type === "chat") {
-      iconStr = `<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>`;
-    } else if (n.type === "request") {
-      iconStr = `<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>`;
-    } else {
-      iconStr = `<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>`;
-    }
+    let link = "#";
+    if (n.type && n.type.includes("request")) link = "requests.html";
+    else if (n.type && n.type.includes("post")) link = "feed.html";
+    else if (n.type === "review") link = "profile.html";
+    else if (n.type === "chat") link = `chat.html${n.reference_id ? '?partner='+n.reference_id : ''}`;
 
     list.innerHTML += `
-      <div class="notif-item ${n.unread ? "unread" : ""}">
-        <div class="notif-icon">${iconStr}</div>
+      <a href="${link}" class="notif-item ${!n.is_read ? "unread" : ""}" style="text-decoration: none; color: inherit;">
+        <div class="notif-icon" style="color: ${n.color || 'var(--text-primary)'}; display: flex; align-items: center; justify-content: center; font-size: 16px;">${n.icon || '🔔'}</div>
         <div class="notif-content">
-          <div class="notif-text">${n.text}</div>
+          <div class="notif-text">${n.message}</div>
           <div class="notif-time">${n.time}</div>
         </div>
-      </div>
+      </a>
     `;
   });
 }
@@ -759,8 +831,6 @@ function getAvatarHTML(user, className = "avatar-img") {
 // Common HTML utilities (Navbar / Sidebar headers generator)
 function getGlobalNavbarHTML(activePage) {
   const user = db.getCurrentUser();
-  const notifs = db.getData("ll_notifications");
-  const hasUnread = notifs.some((n) => n.unread);
 
   let rightSide = "";
   if (user) {
@@ -768,7 +838,7 @@ function getGlobalNavbarHTML(activePage) {
       <div class="user-menu-wrapper">
         <div class="notification-bell btn-icon clickable">
           <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
-          ${hasUnread ? '<div class="bell-badge"></div>' : ""}
+          <div class="bell-badge" id="nav-bell-badge" style="display:none;"></div>
         </div>
         <div class="avatar-trigger clickable">${getAvatarHTML(user)}</div>
         <div class="dropdown-menu user-dropdown glass">
@@ -863,6 +933,7 @@ function getSidebarHTML(activePage) {
           <a href="feed.html">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
             <span>Community Feed</span>
+            <div class="sidebar-badge" id="badge-feed" style="display:none; width:8px; height:8px; border-radius:50%; background:#ef4444; margin-left:auto;"></div>
           </a>
         </li>
         <li class="sidebar-item ${activePage === "explore" ? "active" : ""}">
@@ -875,12 +946,14 @@ function getSidebarHTML(activePage) {
           <a href="requests.html">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
             <span>Requests & Calendar</span>
+            <div class="sidebar-badge" id="badge-requests" style="display:none; width:8px; height:8px; border-radius:50%; background:#ef4444; margin-left:auto;"></div>
           </a>
         </li>
         <li class="sidebar-item ${activePage === "chat" ? "active" : ""}">
           <a href="chat.html">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
             <span>Messaging</span>
+            <div class="sidebar-badge" id="badge-chat" style="display:none; width:8px; height:8px; border-radius:50%; background:#ef4444; margin-left:auto;"></div>
           </a>
         </li>
         <li class="sidebar-item ${activePage === "profile" ? "active" : ""}">
@@ -958,8 +1031,6 @@ document.addEventListener("click", (e) => {
     if (overlay) overlay.classList.remove("active");
   }
 });
-
-// Dynamic counter animation for stats
 function setupStatsCounter() {
   const statNumbers = document.querySelectorAll(".stat-number");
   if (!statNumbers.length) return;
@@ -1023,4 +1094,37 @@ function setupSaaSBackground() {
   bg.appendChild(orb2);
 
   document.body.prepend(bg);
+}
+
+async function clearPageNotifications(page) {
+  const token = sessionStorage.getItem("token") || localStorage.getItem("token");
+  if (!token) return;
+
+  try {
+    const res = await fetch("http://localhost:5009/api/notifications", {
+      headers: { "Authorization": `Bearer ${token}` }
+    });
+    const data = await res.json();
+    if (data.success) {
+      let typesToClear = [];
+      if (page === "requests") typesToClear = ["request", "request_accepted", "request_rejected", "session"];
+      else if (page === "feed") typesToClear = ["post_like", "post_comment"];
+      else if (page === "chat") typesToClear = ["chat"];
+
+      const unreadToClear = data.notifications.filter(n => !n.is_read && typesToClear.includes(n.type));
+
+      if (unreadToClear.length > 0) {
+        for (const n of unreadToClear) {
+          await fetch(`http://localhost:5009/api/notifications/${n.notification_id}/read`, {
+            method: "PUT",
+            headers: { "Authorization": `Bearer ${token}` }
+          });
+        }
+        renderNotifications();
+        updateNotificationBadge();
+      }
+    }
+  } catch(e) {
+    console.error(e);
+  }
 }

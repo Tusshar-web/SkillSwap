@@ -2,6 +2,8 @@ let socket = null;
 
 function connectSocket(token) {
 
+    if (socket) return;
+
     socket = io("http://localhost:5009", {
 
         auth: {
@@ -20,6 +22,12 @@ function connectSocket(token) {
 
         console.log("❌ Disconnected");
 
+    });
+
+    socket.on("newNotification", (data) => {
+        if (typeof renderNotifications === "function") {
+            renderNotifications();
+        }
     });
 
     socket.on("connect_error", (err) => {

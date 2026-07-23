@@ -295,11 +295,26 @@ function renderBadges() {
   });
 }
 
-function renderSystemNotifications() {
+async function renderSystemNotifications() {
   const container = document.getElementById("dashboard-notifications-list");
   if (!container) return;
 
-  const notifications = db.getData("ll_notifications");
+  const token = sessionStorage.getItem("token") || localStorage.getItem("token");
+  if (!token) return;
+
+  let notifications = [];
+  try {
+    const res = await fetch("http://localhost:5009/api/notifications", {
+      headers: { "Authorization": `Bearer ${token}` }
+    });
+    const data = await res.json();
+    if (data.success) {
+      notifications = data.notifications;
+    }
+  } catch (err) {
+    console.error("Failed to load notifications", err);
+  }
+
   if (notifications.length === 0) {
     container.innerHTML = `<div class="empty-state"><p>No system notifications logs.</p></div>`;
     return;
@@ -307,11 +322,17 @@ function renderSystemNotifications() {
 
   container.innerHTML = "";
   notifications.slice(0, 4).forEach(n => {
+    let link = "#";
+    if (n.type && n.type.includes("request")) link = "requests.html";
+    else if (n.type && n.type.includes("post")) link = "feed.html";
+    else if (n.type === "review") link = "profile.html";
+    else if (n.type === "chat") link = `chat.html${n.reference_id ? '?partner='+n.reference_id : ''}`;
+
     container.innerHTML += `
-      <div class="db-notif-item notif-${n.type}">
-        <div class="db-notif-text">${n.text}</div>
+      <a href="${link}" class="db-notif-item notif-${n.type || 'system'}" style="text-decoration: none; color: inherit; display: block;">
+        <div class="db-notif-text">${n.message}</div>
         <div class="db-notif-time">${n.time}</div>
-      </div>
+      </a>
     `;
   });
 }

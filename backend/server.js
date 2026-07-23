@@ -32,6 +32,11 @@ const reviewRoutes = require("./routes/reviewRoutes");
 app.use("/api/reviews", reviewRoutes);
 const sessionRoutes = require("./routes/sessionRoutes");
 app.use("/api/sessions", sessionRoutes);
+const postRoutes = require("./routes/postRoutes");
+app.use("/api/posts", postRoutes);
+const notificationRoutes = require("./routes/notificationRoutes");
+app.use("/api/notifications", notificationRoutes);
+
 // Protected Route
 const authMiddleware = require("./middleware/authMiddleware");
 app.get("/test", authMiddleware, (req, res) => {

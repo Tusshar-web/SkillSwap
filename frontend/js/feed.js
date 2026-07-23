@@ -1,5 +1,5 @@
 // Learnova Dedicated Community Feed Logic
-const token = localStorage.getItem("token");
+const token = sessionStorage.getItem("token") || localStorage.getItem("token");
 
 if (!token) {
     window.location.href = "login.html";
@@ -17,6 +17,10 @@ document.addEventListener("DOMContentLoaded", () => {
     setupTheme();
   }
 
+  if (typeof clearPageNotifications === "function") {
+    setTimeout(() => clearPageNotifications("feed"), 200);
+  }
+
   // Render initial community posts list
   renderActivityFeed();
 
@@ -24,17 +28,29 @@ document.addEventListener("DOMContentLoaded", () => {
   setupPostModalEvents();
 });
 
-function renderActivityFeed() {
+async function renderActivityFeed() {
   const container = document.getElementById("activity-feed-container");
   if (!container) return;
 
-  const posts = db.getData("ll_posts");
   const currentUser = db.getCurrentUser();
 
   // Load avatar in quick share box
   const quickShareAvatar = document.getElementById("quick-share-avatar-placeholder");
   if (quickShareAvatar) {
     quickShareAvatar.innerHTML = getAvatarHTML(currentUser);
+  }
+
+  let posts = [];
+  try {
+    const res = await fetch("http://localhost:5009/api/posts", {
+      headers: { "Authorization": `Bearer ${token}` }
+    });
+    const data = await res.json();
+    if (data.success) {
+      posts = data.posts;
+    }
+  } catch (err) {
+    console.error("Failed to load posts", err);
   }
 
   if (posts.length === 0) {
@@ -45,27 +61,38 @@ function renderActivityFeed() {
   container.innerHTML = "";
   posts.forEach(post => {
     // Check if current user liked this post
-    const isLiked = post.likedBy && post.likedBy.includes(currentUser.id);
+    const isLiked = post.likedByMe;
     const likeBtnClass = isLiked ? "btn-post-action liked" : "btn-post-action";
     
-    // Draw SVG illustrations dynamically based on templates
-    let photoSVG = "";
-    if (post.photoType === "study") {
-      photoSVG = getStudySetupSVG();
-    } else if (post.photoType === "certificate") {
-      photoSVG = getCertificateSVG();
-    } else if (post.photoType === "whiteboard") {
-      photoSVG = getWhiteboardSVG();
+    // Draw SVG illustrations dynamically based on templates if no image
+    let photoContent = "";
+    if (post.image_url) {
+      photoContent = `<img src="${post.image_url}" style="width:100%; border-radius:8px; margin-top:10px;" alt="Post Image">`;
     } else {
-      photoSVG = getWorkspaceSVG();
+      if (post.post_type === "study") {
+        photoContent = getStudySetupSVG();
+      } else if (post.post_type === "certificate") {
+        photoContent = getCertificateSVG();
+      } else if (post.post_type === "whiteboard") {
+        photoContent = getWhiteboardSVG();
+      } else {
+        photoContent = getWorkspaceSVG();
+      }
     }
 
     // Support rendering image tag if avatar is custom URL, else render SVGs
     let authorAvatarHTML = "";
-    if (post.authorAvatar && (post.authorAvatar.startsWith("http") || post.authorAvatar.includes(".") || post.authorAvatar.startsWith("data:image"))) {
-      authorAvatarHTML = `<img src="${post.authorAvatar}" style="width:100%; height:100%; object-fit:cover; border-radius:50%;" alt="${post.authorName}">`;
+    if (post.profile_picture && (post.profile_picture.startsWith("http") || post.profile_picture.includes(".") || post.profile_picture.startsWith("data:image"))) {
+      authorAvatarHTML = `<img src="${post.profile_picture}" style="width:100%; height:100%; object-fit:cover; border-radius:50%;" alt="${post.full_name}">`;
     } else {
-      authorAvatarHTML = post.authorAvatar || getDemoAvatar(post.authorName);
+      authorAvatarHTML = post.profile_picture || getDemoAvatar(post.full_name || 'Member');
+    }
+
+    // Format date
+    let timeString = "Just now";
+    if (post.created_at) {
+      const d = new Date(post.created_at);
+      timeString = d.toLocaleDateString() + " " + d.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
     }
 
     container.innerHTML += `
@@ -73,31 +100,31 @@ function renderActivityFeed() {
         <div class="post-header">
           <div class="post-author-avatar">${authorAvatarHTML}</div>
           <div class="post-author-details">
-            <div class="post-author-name">${post.authorName}</div>
-            <div class="post-author-headline">${post.authorHeadline || 'Learnova Member'}</div>
+            <div class="post-author-name">${post.full_name || 'Learnova Member'}</div>
+            <div class="post-author-headline">Learnova Member</div>
           </div>
-          <span class="post-time">${post.timestamp}</span>
+          <span class="post-time">${timeString}</span>
         </div>
         
-        <p class="post-caption-text">${post.caption}</p>
+        <p class="post-caption-text">${post.content}</p>
         
         <!-- Attached Visual Photo block -->
-        <div class="post-photo-box photo-${post.photoType}">
-          ${photoSVG}
+        <div class="post-photo-box photo-${post.post_type}">
+          ${photoContent}
         </div>
         
         <div class="post-reactions-row">
           <div class="likes-indicator">
-            <span>👍</span> <strong class="likes-cnt-lbl">${post.likes} likes</strong>
+            <span>👍</span> <strong class="likes-cnt-lbl">${post.like_count || 0} likes</strong>
           </div>
-          <div class="comments-indicator">0 comments</div>
+          <div class="comments-indicator">${post.comment_count || 0} comments</div>
         </div>
         
         <div class="post-actions-row">
-          <button class="${likeBtnClass}" data-id="${post.id}">
+          <button class="${likeBtnClass}" data-id="${post.post_id}">
             <span style="font-size:14px;">👍</span> Like
           </button>
-          <button class="btn-post-action comment-post-trigger" data-id="${post.id}">
+          <button class="btn-post-action comment-post-trigger" data-id="${post.post_id}">
             <span style="font-size:14px;">💬</span> Comment
           </button>
         </div>
@@ -121,26 +148,19 @@ function renderActivityFeed() {
   });
 }
 
-function togglePostLike(postId) {
-  const posts = db.getData("ll_posts");
-  const currentUser = db.getCurrentUser();
-  const post = posts.find(p => p.id === postId);
-  
-  if (!post) return;
-
-  if (!post.likedBy) post.likedBy = [];
-
-  const idx = post.likedBy.indexOf(currentUser.id);
-  if (idx === -1) {
-    post.likes = (post.likes || 0) + 1;
-    post.likedBy.push(currentUser.id);
-  } else {
-    post.likes = Math.max((post.likes || 1) - 1, 0);
-    post.likedBy.splice(idx, 1);
+async function togglePostLike(postId) {
+  try {
+    const res = await fetch(`http://localhost:5009/api/posts/${postId}/like`, {
+      method: "POST",
+      headers: { "Authorization": `Bearer ${token}` }
+    });
+    const data = await res.json();
+    if (data.success) {
+      renderActivityFeed();
+    }
+  } catch (err) {
+    console.error("Failed to toggle like", err);
   }
-
-  db.saveData("ll_posts", posts);
-  renderActivityFeed();
 }
 
 function setupPostModalEvents() {
@@ -175,32 +195,46 @@ function setupPostModalEvents() {
     });
   });
 
-  form.addEventListener("submit", (e) => {
+  form.addEventListener("submit", async (e) => {
     e.preventDefault();
     const caption = document.getElementById("post-caption").value.trim();
     const photoType = document.querySelector('input[name="photo-template-select"]:checked').value;
+    const imageInput = document.getElementById("post-image");
 
-    const currentUser = db.getCurrentUser();
-    const posts = db.getData("ll_posts");
+    const formData = new FormData();
+    formData.append("content", caption);
+    formData.append("post_type", photoType);
+    if (imageInput && imageInput.files && imageInput.files[0]) {
+      formData.append("image", imageInput.files[0]);
+    }
 
-    const newPost = {
-      id: "post-" + Date.now(),
-      authorName: currentUser.name,
-      authorHeadline: currentUser.headline || "Learnova Barter Member",
-      authorAvatar: currentUser.avatar,
-      caption: caption,
-      photoType: photoType,
-      timestamp: "Just now",
-      likes: 0,
-      likedBy: []
-    };
+    const submitBtn = form.querySelector('button[type="submit"]');
+    const originalBtnText = submitBtn.innerHTML;
+    submitBtn.innerHTML = "Sharing...";
+    submitBtn.disabled = true;
 
-    posts.unshift(newPost);
-    db.saveData("ll_posts", posts);
-
-    closeModal();
-    renderActivityFeed();
-    showToast("Post shared to community feed successfully!", "success");
+    try {
+      const res = await fetch("http://localhost:5009/api/posts", {
+        method: "POST",
+        headers: { "Authorization": `Bearer ${token}` },
+        body: formData
+      });
+      const data = await res.json();
+      if (data.success) {
+        closeModal();
+        renderActivityFeed();
+        showToast("Post shared to community feed successfully!", "success");
+        if (imageInput) imageInput.value = "";
+      } else {
+        showToast(data.message || "Failed to share post.", "error");
+      }
+    } catch (err) {
+      console.error("Post error:", err);
+      showToast("Error sharing post.", "error");
+    } finally {
+      submitBtn.innerHTML = originalBtnText;
+      submitBtn.disabled = false;
+    }
   });
 }
 

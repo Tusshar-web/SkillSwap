@@ -1,4 +1,4 @@
-const { getMessagesByRequestId } = require("../models/chatModel");
+const { getMessagesByRequestId, markMessagesAsRead } = require("../models/chatModel");
 const { getRequestById } = require("../models/swapRequestModel");
 
 const getChatHistory = async (req, res) => {
@@ -27,6 +27,8 @@ const getChatHistory = async (req, res) => {
                 message: "Unauthorized."
             });
         }
+
+        await markMessagesAsRead(requestId, userId);
 
         const messages =
             await getMessagesByRequestId(requestId);

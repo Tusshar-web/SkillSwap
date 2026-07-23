@@ -1542,19 +1542,36 @@ body {
 /* Light mode modifications for body & default tags */
 body {
   position: relative;
-  background-color: transparent !important; /* Let saas bg show through */
+  background-color: transparent !important;
+  /* Let saas bg show through */
 }
 
 @keyframes saas-drift-1 {
-  0% { transform: translate3d(0, 0, 0) scale(1); }
-  50% { transform: translate3d(80px, 40px, 0) scale(1.1); }
-  100% { transform: translate3d(-30px, -60px, 0) scale(0.9); }
+  0% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+
+  50% {
+    transform: translate3d(80px, 40px, 0) scale(1.1);
+  }
+
+  100% {
+    transform: translate3d(-30px, -60px, 0) scale(0.9);
+  }
 }
 
 @keyframes saas-drift-2 {
-  0% { transform: translate3d(0, 0, 0) scale(1); }
-  50% { transform: translate3d(-60px, -50px, 0) scale(1.15); }
-  100% { transform: translate3d(40px, 60px, 0) scale(0.85); }
+  0% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+
+  50% {
+    transform: translate3d(-60px, -50px, 0) scale(1.15);
+  }
+
+  100% {
+    transform: translate3d(40px, 60px, 0) scale(0.85);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

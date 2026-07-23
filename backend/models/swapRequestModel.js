@@ -249,7 +249,13 @@ const getAcceptedConversations = async (userId) => {
                 WHEN er.sender_id = ?
                 THEN receiver.full_name
                 ELSE sender.full_name
-            END AS partner_name
+            END AS partner_name,
+            
+            (SELECT message FROM messages m WHERE m.request_id = er.request_id ORDER BY m.created_at DESC LIMIT 1) AS last_message,
+            
+            (SELECT created_at FROM messages m WHERE m.request_id = er.request_id ORDER BY m.created_at DESC LIMIT 1) AS last_message_time,
+            
+            (SELECT COUNT(*) FROM messages m WHERE m.request_id = er.request_id AND m.receiver_id = ? AND m.is_read = 0) AS unread_count
 
         FROM exchange_requests er
 
@@ -264,6 +270,7 @@ const getAcceptedConversations = async (userId) => {
             AND er.status = 'Accepted'`,
 
         [
+            userId,
             userId,
             userId,
             userId,

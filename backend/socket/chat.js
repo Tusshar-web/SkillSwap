@@ -1,5 +1,6 @@
 const { getRequestById } = require("../models/swapRequestModel");
 const { saveMessage } = require("../models/chatModel");
+const { createNotification } = require("../models/notifcationModel");
 
 module.exports = (io, socket) => {
   socket.on("sendMessage", async (data) => {
@@ -31,6 +32,16 @@ module.exports = (io, socket) => {
       }
 
       await saveMessage(requestId, senderId, receiverId, message);
+      
+      // Notify receiver
+      await createNotification(
+          receiverId,
+          senderId,
+          "chat",
+          requestId
+      );
+      
+      io.to(`user_${receiverId}`).emit("newNotification", { type: "chat" });
 
       io.to(`request_${requestId}`).emit("newMessage", {
         request_id: requestId,

@@ -32,7 +32,18 @@ const getMessagesByRequestId = async (requestId) => {
     return rows;
 };
 
+const markMessagesAsRead = async (requestId, receiverId) => {
+    const [result] = await db.execute(
+        `UPDATE messages
+         SET is_read = 1
+         WHERE request_id = ? AND receiver_id = ? AND is_read = 0`,
+        [requestId, receiverId]
+    );
+    return result;
+};
+
 module.exports = {
     saveMessage,
-    getMessagesByRequestId
+    getMessagesByRequestId,
+    markMessagesAsRead
 };
