@@ -5,6 +5,7 @@ const {
     markSessionCompleted,
     cancelSession
 } = require("../models/sessionModel");
+const crypto = require("crypto");
 
 const createSessionController = async (req, res) => {
     try {
@@ -14,6 +15,9 @@ const createSessionController = async (req, res) => {
             return res.status(400).json({ success: false, message: "Missing required fields." });
         }
 
+        const roomName = "SkillSwap_Session_" + crypto.randomBytes(6).toString('hex');
+        const meeting_url = `https://meet.jit.si/${roomName}`;
+
         const sessionId = await createSession(
             request_id,
             req.user.id,
@@ -21,7 +25,8 @@ const createSessionController = async (req, res) => {
             topic,
             date,
             time,
-            timezone || 'GMT+1'
+            timezone || 'GMT+1',
+            meeting_url
         );
 
         const newSession = await getSessionById(sessionId);

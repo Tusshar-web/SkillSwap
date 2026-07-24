@@ -563,7 +563,7 @@ function renderAgenda(dateStr) {
         <div class="req-actions-row" style="margin-top: 10px; display: flex; gap: 8px;">
           <button class="btn btn-secondary btn-sm cancel-session-btn" data-id="${s.id}">Cancel</button>
           <button class="btn btn-primary btn-sm complete-session-btn" data-id="${s.id}">Mark Complete</button>
-          <a href="call.html?partner=${s.partnerId}&session=${s.id}" class="btn btn-glow btn-sm join-call-btn" style="background:#10b981; color:#fff; border-color:#10b981; font-weight:700; text-decoration:none; display:inline-flex; align-items:center; justify-content:center; padding: 6px 12px; border-radius: 8px;">Join Call</a>
+          <a href="${s.meeting_url || '#'}" target="_blank" class="btn btn-glow btn-sm join-call-btn" style="background:#10b981; color:#fff; border-color:#10b981; font-weight:700; text-decoration:none; display:inline-flex; align-items:center; justify-content:center; padding: 6px 12px; border-radius: 8px;">Join Zoom/Meet</a>
         </div>
       `;
     } else if (s.status === "Waiting for Partner") {

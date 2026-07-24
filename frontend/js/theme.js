@@ -396,7 +396,8 @@ class LearnLoopDB {
             time: s.scheduled_time ? s.scheduled_time.substring(0, 5) : "00:00",
             timezone: s.timezone,
             topic: s.topic,
-            status: stat
+            status: stat,
+            meeting_url: s.meeting_url
           };
         });
         

@@ -1,6 +1,6 @@
 const db = require("../config/db");
 
-const createSession = async (request_id, partner_1_id, partner_2_id, topic, scheduled_date, scheduled_time, timezone) => {
+const createSession = async (request_id, partner_1_id, partner_2_id, topic, scheduled_date, scheduled_time, timezone, meeting_url) => {
     // Note: request_id might be "req-custom-book" or similar string from frontend if it was manual.
     // If it's not a valid INT, we store NULL or we just change the schema to allow string?
     // Wait, DB schema says request_id is INT. Let's cast to INT or set NULL if not a number.
@@ -10,9 +10,9 @@ const createSession = async (request_id, partner_1_id, partner_2_id, topic, sche
     }
 
     const [result] = await db.execute(
-        `INSERT INTO sessions (request_id, partner_1_id, partner_2_id, topic, scheduled_date, scheduled_time, timezone) 
-         VALUES (?, ?, ?, ?, ?, ?, ?)`,
-        [reqId, partner_1_id, partner_2_id, topic, scheduled_date, scheduled_time, timezone]
+        `INSERT INTO sessions (request_id, partner_1_id, partner_2_id, topic, scheduled_date, scheduled_time, timezone, meeting_url) 
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+        [reqId, partner_1_id, partner_2_id, topic, scheduled_date, scheduled_time, timezone, meeting_url]
     );
     return result.insertId;
 };
