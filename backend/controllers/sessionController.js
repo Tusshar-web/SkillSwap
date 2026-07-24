@@ -15,7 +15,7 @@ const createSessionController = async (req, res) => {
             return res.status(400).json({ success: false, message: "Missing required fields." });
         }
 
-        const roomName = "SkillSwap_Session_" + crypto.randomBytes(6).toString('hex');
+        const roomName = "Learnova_" + crypto.randomBytes(6).toString('hex');
         const meeting_url = `https://meet.jit.si/${roomName}`;
 
         const sessionId = await createSession(
