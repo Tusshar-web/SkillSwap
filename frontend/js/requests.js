@@ -1,5 +1,5 @@
 // Learnova Requests and Scheduling Calendar Logic
-const token = localStorage.getItem("token");
+const token = sessionStorage.getItem("token") || localStorage.getItem("token");
 
 if (!token) {
     window.location.href = "login.html";

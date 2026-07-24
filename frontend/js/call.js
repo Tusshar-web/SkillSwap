@@ -1,5 +1,5 @@
 // Learnova Secure Meeting Room - Google Meet & Zoom Controller Logic
-const token = localStorage.getItem("token");
+const token = sessionStorage.getItem("token") || localStorage.getItem("token");
 
 if (!token) {
     window.location.href = "login.html";
