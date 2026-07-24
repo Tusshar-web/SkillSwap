@@ -2,10 +2,10 @@
 window.CONFIG = {
     API_URL: window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
         ? 'http://localhost:5009/api' 
-        : 'https://your-backend.onrender.com/api', // REPLACE THIS ONCE DEPLOYED
+        : 'https://learnova-backend.onrender.com/api',
     SOCKET_URL: window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
         ? 'http://localhost:5009'
-        : 'https://your-backend.onrender.com' // REPLACE THIS ONCE DEPLOYED
+        : 'https://learnova-backend.onrender.com'
 };
 
 // Learnova Global State & Theme Manager
