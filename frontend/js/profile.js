@@ -178,7 +178,7 @@ function setupProfileModalEvents() {
 
         showToast("Uploading profile picture...", "info");
 
-        const res = await fetch("http://localhost:5009/api/users/profile-picture", {
+        const res = await fetch(`${window.CONFIG.API_URL}/users/profile-picture`, {
           method: "POST",
           headers: {
             "Authorization": `Bearer ${token}`
@@ -333,8 +333,8 @@ function setupSkillModalEvents() {
       debounceTimer = setTimeout(async () => {
         try {
           const url = val 
-            ? `http://localhost:5009/api/skills/search?q=${encodeURIComponent(val)}`
-            : `http://localhost:5009/api/skills/`;
+            ? `${window.CONFIG.API_URL}/skills/search?q=${encodeURIComponent(val)}`
+            : `${window.CONFIG.API_URL}/skills/`;
           const res = await fetch(url);
           if (res.ok) {
             const data = await res.json();
@@ -375,7 +375,7 @@ function setupSkillModalEvents() {
       }
       if (token) {
         try {
-          const res = await fetch("http://localhost:5009/api/skills/", {
+          const res = await fetch(`${window.CONFIG.API_URL}/skills/`, {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
@@ -407,7 +407,7 @@ function setupSkillModalEvents() {
     } else {
       if (token && targetArr[editIdx] && targetArr[editIdx].userSkillId) {
         try {
-          const res = await fetch(`http://localhost:5009/api/skills/${targetArr[editIdx].userSkillId}`, {
+          const res = await fetch(`${window.CONFIG.API_URL}/skills/${targetArr[editIdx].userSkillId}`, {
             method: "PUT",
             headers: {
               "Content-Type": "application/json",
@@ -492,7 +492,7 @@ async function deleteSkill(type, index) {
 
   if (token && removed.userSkillId) {
     try {
-      const res = await fetch(`http://localhost:5009/api/skills/${removed.userSkillId}`, {
+      const res = await fetch(`${window.CONFIG.API_URL}/skills/${removed.userSkillId}`, {
         method: "DELETE",
         headers: {
           "Authorization": `Bearer ${token}`
@@ -597,7 +597,7 @@ async function renderProfileReviews() {
 
   let reviews = [];
   try {
-    const res = await fetch(`http://localhost:5009/api/reviews/user/${backendId}`);
+    const res = await fetch(`${window.CONFIG.API_URL}/reviews/user/${backendId}`);
     if (res.ok) {
       const data = await res.json();
       if (data.success && data.reviews) {
@@ -677,7 +677,7 @@ async function renderMyPosts() {
   if (!user || !user.backendId) return;
 
   try {
-    const res = await fetch("http://localhost:5009/api/posts", {
+    const res = await fetch(`${window.CONFIG.API_URL}/posts`, {
       headers: { "Authorization": `Bearer ${token}` }
     });
     const data = await res.json();
@@ -722,7 +722,7 @@ async function renderMyPosts() {
           if (!confirm("Are you sure you want to delete this post?")) return;
           const postId = btn.getAttribute("data-id");
           try {
-            const delRes = await fetch(`http://localhost:5009/api/posts/${postId}`, {
+            const delRes = await fetch(`${window.CONFIG.API_URL}/posts/${postId}`, {
               method: "DELETE",
               headers: { "Authorization": `Bearer ${token}` }
             });

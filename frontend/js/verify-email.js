@@ -145,7 +145,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       try {
-        const response = await fetch("http://localhost:5009/api/auth/verify-email", {
+        const response = await fetch(`${window.CONFIG.API_URL}/auth/verify-email`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json"
@@ -202,7 +202,7 @@ document.addEventListener("DOMContentLoaded", () => {
       resendBtn.textContent = "Sending...";
 
       try {
-        const response = await fetch("http://localhost:5009/api/auth/resend-otp", {
+        const response = await fetch(`${window.CONFIG.API_URL}/auth/resend-otp`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json"

@@ -277,7 +277,7 @@ async function markExchangeCompleted(reqId) {
 
   if (token && backendId) {
     try {
-      const res = await fetch(`http://localhost:5009/api/exchange-requests/${backendId}/complete`, {
+      const res = await fetch(`${window.CONFIG.API_URL}/exchange-requests/${backendId}/complete`, {
         method: "PUT",
         headers: { "Authorization": `Bearer ${token}` }
       });
@@ -311,7 +311,7 @@ async function acceptRequest(reqId) {
 
   if (token && backendId) {
     try {
-      const res = await fetch(`http://localhost:5009/api/exchange-requests/${backendId}/accept`, {
+      const res = await fetch(`${window.CONFIG.API_URL}/exchange-requests/${backendId}/accept`, {
         method: "PUT",
         headers: { "Authorization": `Bearer ${token}` }
       });
@@ -338,7 +338,7 @@ async function acceptRequest(reqId) {
 
   if (token && backendId && partner && partner.backendId) {
     try {
-      await fetch("http://localhost:5009/api/sessions", {
+      await fetch(`${window.CONFIG.API_URL}/sessions`, {
         method: "POST",
         headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
         body: JSON.stringify({
@@ -395,7 +395,7 @@ async function rejectRequest(reqId) {
 
   if (token && backendId) {
     try {
-      const res = await fetch(`http://localhost:5009/api/exchange-requests/${backendId}/reject`, {
+      const res = await fetch(`${window.CONFIG.API_URL}/exchange-requests/${backendId}/reject`, {
         method: "PUT",
         headers: { "Authorization": `Bearer ${token}` }
       });
@@ -430,7 +430,7 @@ async function cancelRequest(reqId) {
 
     if (token && backendId) {
       try {
-        const res = await fetch(`http://localhost:5009/api/exchange-requests/${backendId}`, {
+        const res = await fetch(`${window.CONFIG.API_URL}/exchange-requests/${backendId}`, {
           method: "DELETE",
           headers: { "Authorization": `Bearer ${token}` }
         });
@@ -602,7 +602,7 @@ function renderAgenda(dateStr) {
       const token = sessionStorage.getItem("token") || localStorage.getItem("token");
       if (token && s.backendId) {
          try {
-             const res = await fetch(`http://localhost:5009/api/sessions/${s.backendId}/complete`, {
+             const res = await fetch(`${window.CONFIG.API_URL}/sessions/${s.backendId}/complete`, {
                  method: "PUT",
                  headers: { "Authorization": `Bearer ${token}` }
              });
@@ -637,7 +637,7 @@ async function cancelSession(sessId) {
     const token = sessionStorage.getItem("token") || localStorage.getItem("token");
     if (token && sessionToCancel.backendId) {
       try {
-        const res = await fetch(`http://localhost:5009/api/sessions/${sessionToCancel.backendId}`, {
+        const res = await fetch(`${window.CONFIG.API_URL}/sessions/${sessionToCancel.backendId}`, {
           method: "DELETE",
           headers: { "Authorization": `Bearer ${token}` }
         });
@@ -693,7 +693,7 @@ function setupBookingModalEvents() {
     const token = sessionStorage.getItem("token") || localStorage.getItem("token");
     if (token && partner && partner.backendId) {
       try {
-        await fetch("http://localhost:5009/api/sessions", {
+        await fetch(`${window.CONFIG.API_URL}/sessions`, {
           method: "POST",
           headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
           body: JSON.stringify({
@@ -822,7 +822,7 @@ function setupReviewModalEvents() {
       const bId = backendId || (exchangeId.startsWith("er-") ? exchangeId.replace("er-", "") : null);
       if (token && bId) {
         try {
-          const res = await fetch(`http://localhost:5009/api/reviews`, {
+          const res = await fetch(`${window.CONFIG.API_URL}/reviews`, {
             method: "POST",
             headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
             body: JSON.stringify({ request_id: bId, rating: rating, comment: feedback })

@@ -23,7 +23,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   try {
-    const res = await fetch("http://localhost:5009/api/users/dashboard-stats", {
+    const res = await fetch(`${window.CONFIG.API_URL}/users/dashboard-stats`, {
       headers: { "Authorization": `Bearer ${token}` }
     });
     const data = await res.json();
@@ -74,7 +74,7 @@ async function drawActivityChart() {
 
   try {
     const token = sessionStorage.getItem("token");
-    const res = await fetch("http://localhost:5009/api/users/activity-stats", {
+    const res = await fetch(`${window.CONFIG.API_URL}/users/activity-stats`, {
       headers: { "Authorization": `Bearer ${token}` }
     });
     const data = await res.json();
@@ -304,7 +304,7 @@ async function renderSystemNotifications() {
 
   let notifications = [];
   try {
-    const res = await fetch("http://localhost:5009/api/notifications", {
+    const res = await fetch(`${window.CONFIG.API_URL}/notifications`, {
       headers: { "Authorization": `Bearer ${token}` }
     });
     const data = await res.json();

@@ -225,7 +225,7 @@ async function selectConversation(requestId, partnerId, partnerName) {
 async function loadMessages(requestId) {
   const token = sessionStorage.getItem("token");
 
-  const response = await fetch(`http://localhost:5009/api/chat/${requestId}`, {
+  const response = await fetch(`${window.CONFIG.API_URL}/chat/${requestId}`, {
     headers: {
       Authorization: `Bearer ${token}`,
     },

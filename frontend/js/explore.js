@@ -271,7 +271,7 @@ function setupRequestModalEvents() {
 
     if (token && offerSkillId && receiveSkillId && targetBackendId && !isNaN(Number(targetBackendId))) {
       try {
-        const response = await fetch("http://localhost:5009/api/exchange-requests", {
+        const response = await fetch(`${window.CONFIG.API_URL}/exchange-requests`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",

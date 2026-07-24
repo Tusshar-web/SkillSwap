@@ -1,4 +1,4 @@
-const API_URL = "http://localhost:5009/api";
+const API_URL = `${window.CONFIG.API_URL}`;
 
 async function getConversations() {
 

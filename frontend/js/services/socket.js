@@ -4,7 +4,7 @@ function connectSocket(token) {
 
     if (socket) return;
 
-    socket = io("http://localhost:5009", {
+    socket = io(window.CONFIG.SOCKET_URL, {
 
         auth: {
             token: token

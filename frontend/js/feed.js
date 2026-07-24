@@ -42,7 +42,7 @@ async function renderActivityFeed() {
 
   let posts = [];
   try {
-    const res = await fetch("http://localhost:5009/api/posts", {
+    const res = await fetch(`${window.CONFIG.API_URL}/posts`, {
       headers: { "Authorization": `Bearer ${token}` }
     });
     const data = await res.json();
@@ -150,7 +150,7 @@ async function renderActivityFeed() {
 
 async function togglePostLike(postId) {
   try {
-    const res = await fetch(`http://localhost:5009/api/posts/${postId}/like`, {
+    const res = await fetch(`${window.CONFIG.API_URL}/posts/${postId}/like`, {
       method: "POST",
       headers: { "Authorization": `Bearer ${token}` }
     });
@@ -214,7 +214,7 @@ function setupPostModalEvents() {
     submitBtn.disabled = true;
 
     try {
-      const res = await fetch("http://localhost:5009/api/posts", {
+      const res = await fetch(`${window.CONFIG.API_URL}/posts`, {
         method: "POST",
         headers: { "Authorization": `Bearer ${token}` },
         body: formData

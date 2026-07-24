@@ -1,3 +1,13 @@
+// Global Configuration
+window.CONFIG = {
+    API_URL: window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
+        ? 'http://localhost:5009/api' 
+        : 'https://your-backend.onrender.com/api', // REPLACE THIS ONCE DEPLOYED
+    SOCKET_URL: window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+        ? 'http://localhost:5009'
+        : 'https://your-backend.onrender.com' // REPLACE THIS ONCE DEPLOYED
+};
+
 // Learnova Global State & Theme Manager
 
 // Global Badges Directory
@@ -215,7 +225,7 @@ class LearnLoopDB {
 
   async fetchActualUsers() {
     try {
-      const res = await fetch("http://localhost:5009/api/users/all");
+      const res = await fetch(`${window.CONFIG.API_URL}/users/all`);
       if (!res.ok) return;
       const json = await res.json();
       if (json && json.success && Array.isArray(json.data)) {
@@ -246,7 +256,7 @@ class LearnLoopDB {
     const token = sessionStorage.getItem("token") || localStorage.getItem("token");
     if (!token) return;
     try {
-      const res = await fetch("http://localhost:5009/api/skills/me", {
+      const res = await fetch(`${window.CONFIG.API_URL}/skills/me`, {
         headers: { "Authorization": `Bearer ${token}` }
       });
       if (!res.ok) return;
@@ -287,10 +297,10 @@ class LearnLoopDB {
     if (!token) return;
     try {
       const [inRes, outRes] = await Promise.all([
-        fetch("http://localhost:5009/api/exchange-requests/incoming", {
+        fetch(`${window.CONFIG.API_URL}/exchange-requests/incoming`, {
           headers: { "Authorization": `Bearer ${token}` }
         }),
-        fetch("http://localhost:5009/api/exchange-requests/outgoing", {
+        fetch(`${window.CONFIG.API_URL}/exchange-requests/outgoing`, {
           headers: { "Authorization": `Bearer ${token}` }
         })
       ]);
@@ -345,7 +355,7 @@ class LearnLoopDB {
     const token = sessionStorage.getItem("token") || localStorage.getItem("token");
     if (!token) return;
     try {
-      const res = await fetch("http://localhost:5009/api/sessions", {
+      const res = await fetch(`${window.CONFIG.API_URL}/sessions`, {
         headers: { "Authorization": `Bearer ${token}` }
       });
       if (!res.ok) return;
@@ -621,7 +631,7 @@ async function updateNotificationBadge() {
   const token = sessionStorage.getItem("token") || localStorage.getItem("token");
   if (!token) return;
   try {
-    const res = await fetch("http://localhost:5009/api/notifications/unread-count", {
+    const res = await fetch(`${window.CONFIG.API_URL}/notifications/unread-count`, {
       headers: { "Authorization": `Bearer ${token}` }
     });
     const data = await res.json();
@@ -661,7 +671,7 @@ function setupDropdowns() {
       const token = sessionStorage.getItem("token") || localStorage.getItem("token");
       if (token) {
         try {
-          await fetch("http://localhost:5009/api/notifications/read-all", {
+          await fetch(`${window.CONFIG.API_URL}/notifications/read-all`, {
             method: "PUT",
             headers: { "Authorization": `Bearer ${token}` }
           });
@@ -702,7 +712,7 @@ async function renderNotifications() {
 
   let notifications = [];
   try {
-    const res = await fetch("http://localhost:5009/api/notifications", {
+    const res = await fetch(`${window.CONFIG.API_URL}/notifications`, {
       headers: { "Authorization": `Bearer ${token}` }
     });
     const data = await res.json();
@@ -1101,7 +1111,7 @@ async function clearPageNotifications(page) {
   if (!token) return;
 
   try {
-    const res = await fetch("http://localhost:5009/api/notifications", {
+    const res = await fetch(`${window.CONFIG.API_URL}/notifications`, {
       headers: { "Authorization": `Bearer ${token}` }
     });
     const data = await res.json();
@@ -1115,7 +1125,7 @@ async function clearPageNotifications(page) {
 
       if (unreadToClear.length > 0) {
         for (const n of unreadToClear) {
-          await fetch(`http://localhost:5009/api/notifications/${n.notification_id}/read`, {
+          await fetch(`${window.CONFIG.API_URL}/notifications/${n.notification_id}/read`, {
             method: "PUT",
             headers: { "Authorization": `Bearer ${token}` }
           });

@@ -102,7 +102,7 @@ if (loginForm) {
 
     try {
 
-      const response = await fetch("http://localhost:5009/api/auth/login", {
+      const response = await fetch(`${window.CONFIG.API_URL}/auth/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
@@ -198,7 +198,7 @@ if (regForm) {
 
     try {
 
-      const response = await fetch("http://localhost:5009/api/auth/register", {
+      const response = await fetch(`${window.CONFIG.API_URL}/auth/register`, {
 
         method: "POST",
 
