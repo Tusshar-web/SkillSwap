@@ -4,17 +4,17 @@ const sendOTP = async (email, otp) => {
 
     await transporter.sendMail({
 
-        from: `"LearnLoop" <${process.env.EMAIL_USER}>`,
+        from: `"Learnova" <${(process.env.EMAIL_USER || "").trim()}>`,
 
         to: email,
 
-        subject: "Verify your LearnLoop Account",
+        subject: "Verify your Learnova Account",
 
         html: `
 
         <div style="font-family:Arial">
 
-            <h2>Welcome to LearnLoop 🎉</h2>
+            <h2>Welcome to Learnova 🎉</h2>
 
             <p>Your verification code is</p>
 
