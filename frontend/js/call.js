@@ -17,12 +17,12 @@ let ctx = null;
 let penColor = "#7C3AED";
 let penSize = 5;
 
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
   forceAuth();
 
   // 1. Fetch meeting params
   const params = new URLSearchParams(window.location.search);
-  const partnerId = params.get("partner") || "user-3";
+  const partnerId = params.get("partner");
   const sessionId = params.get("session");
 
   // Validate Secure Session Access Rule
@@ -31,67 +31,82 @@ document.addEventListener("DOMContentLoaded", () => {
     return;
   }
 
-  // Look up scheduled session in database
-  const sessions = db.getData("ll_sessions");
-  const sessObj = sessions.find(s => s.id === sessionId);
+  try {
+    const res = await fetch(`${window.CONFIG.API_URL}/sessions`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    const data = await res.json();
+    
+    if (!data.success) {
+      blockCallAccess("Failed to load sessions from server.");
+      return;
+    }
+    
+    // Find the session matching sessionId
+    const sessObj = data.sessions.find(s => String(s.id) === String(sessionId));
 
-  if (!sessObj) {
-    blockCallAccess("The requested barter session could not be found in the database directory.");
-    return;
+    if (!sessObj) {
+      blockCallAccess("The requested barter session could not be found in the database directory.");
+      return;
+    }
+
+    // Validate date match
+    const today = new Date();
+    const y = today.getFullYear();
+    const m = String(today.getMonth() + 1).padStart(2, '0');
+    const d = String(today.getDate()).padStart(2, '0');
+    const todayStr = `${y}-${m}-${d}`;
+
+    const sDate = sessObj.scheduled_date ? sessObj.scheduled_date.split('T')[0] : sessObj.date;
+    
+    if (sDate !== todayStr && sessObj.id != "sess-1") {
+      blockCallAccess(`This meeting is scheduled for ${sDate}. You can only join the video conference room on the scheduled day of the barter session.`);
+      return;
+    }
+
+    const partnerName = sessObj.partner_name || "Partner";
+
+    // Set Meeting details
+    const headerTitle = document.getElementById("meeting-title-lbl");
+    const partnerSub = document.getElementById("partner-subtitle-lbl");
+    const remoteName = document.getElementById("remote-stream-name-lbl");
+
+    partnerSub.textContent = `Partner: ${partnerName}`;
+    remoteName.textContent = partnerName;
+    
+    document.getElementById("remote-pip-name-lbl").textContent = partnerName.split(" ")[0];
+    
+    const localUser = JSON.parse(sessionStorage.getItem("user") || "{}");
+    if(localUser.full_name) {
+       document.getElementById("local-avatar-container").innerHTML = `<div class="avatar-placeholder" style="background:var(--primary); color:white; width:100%; height:100%; display:flex; align-items:center; justify-content:center; border-radius:50%; font-size:2rem; font-weight:bold;">${localUser.full_name.charAt(0)}</div>`;
+    }
+
+    headerTitle.textContent = sessObj.topic || "SkillSwap Meeting";
+
+    // 2. Start duration clock
+    startCallTimer();
+
+    // 3. Request webcam capture
+    startWebcam();
+
+    // 4. Initialize Controls
+    setupToolbarControls(sessionId);
+
+    // 5. Initialize Side Drawers Panels
+    setupDrawers();
+
+    // 6. Collaborative Whiteboard
+    initWhiteboard();
+
+    // 7. Sim speech indicators
+    simulateSpeechPattern();
+
+    // 8. Simulated chat logs
+    initializeCallChatHistory();
+  } catch (err) {
+    console.error(err);
+    blockCallAccess("Failed to connect to the server.");
   }
-
-  // Validate date match
-  const today = new Date();
-  const y = today.getFullYear();
-  const m = String(today.getMonth() + 1).padStart(2, '0');
-  const d = String(today.getDate()).padStart(2, '0');
-  const todayStr = `${y}-${m}-${d}`;
-
-  if (sessObj.date !== todayStr && sessObj.id !== "sess-1") {
-    blockCallAccess(`This meeting is scheduled for ${sessObj.date} at ${sessObj.time}. You can only join the video conference room on the scheduled day of the barter session.`);
-    return;
-  }
-
-  // Fetch partner details
-  const users = db.getData("ll_users");
-  partnerObj = users.find(u => u.id === partnerId) || users[0];
-
-  // Set Meeting details
-  const headerTitle = document.getElementById("meeting-title-lbl");
-  const partnerSub = document.getElementById("partner-subtitle-lbl");
-  const remoteName = document.getElementById("remote-stream-name-lbl");
-
-  if (partnerObj) {
-    partnerSub.textContent = `Partner: ${partnerObj.name}`;
-    remoteName.textContent = partnerObj.name;
-    document.getElementById("remote-avatar-container").innerHTML = getAvatarHTML(partnerObj);
-    document.getElementById("remote-pip-avatar-container").innerHTML = getAvatarHTML(partnerObj);
-    document.getElementById("remote-pip-name-lbl").textContent = partnerObj.name.split(" ")[0];
-    document.getElementById("local-avatar-container").innerHTML = getAvatarHTML(db.getCurrentUser());
-  }
-
-  headerTitle.textContent = sessObj.topic;
-
-  // 2. Start duration clock
-  startCallTimer();
-
-  // 3. Request webcam capture
-  startWebcam();
-
-  // 4. Initialize Controls
-  setupToolbarControls(sessionId);
-
-  // 5. Initialize Side Drawers Panels
-  setupDrawers();
-
-  // 6. Collaborative Whiteboard
-  initWhiteboard();
-
-  // 7. Sim speech indicators
-  simulateSpeechPattern();
-
-  // 8. Simulated chat logs
-  initializeCallChatHistory();
 });
 
 // Block access helper
@@ -263,7 +278,7 @@ function setupToolbarControls(sessionId) {
   });
 
   // End Call
-  hangupBtn.addEventListener("click", () => {
+  hangupBtn.addEventListener("click", async () => {
     if (localStream) {
       localStream.getTracks().forEach(track => track.stop());
     }
@@ -273,13 +288,14 @@ function setupToolbarControls(sessionId) {
     clearInterval(callTimer);
 
     if (sessionId) {
-      const sessions = db.getData("ll_sessions");
-      const sessObj = sessions.find(s => s.id === sessionId);
-      if (sessObj) {
-        sessObj.status = "Completed";
-        db.saveData("ll_sessions", sessions);
-
+      try {
+        await fetch(`${window.CONFIG.API_URL}/sessions/${sessionId}/complete`, {
+           method: "PUT",
+           headers: { Authorization: `Bearer ${token}` }
+        });
         localStorage.setItem("ll_review_pending_session_id", sessionId);
+      } catch (err) {
+        console.error(err);
       }
       window.location.href = "requests.html";
     } else {
